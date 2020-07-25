@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/main.css">
+  <title>ConvertIMG</title>
+</head>
+
+<body class="flex f-center f-vcenter">
+
+  <main class="main">
+    <section class="flex f-spacebetween f-vcenter m-top">
+      <div class="mh-side"></div>
+      <div class="mh-mid flex f-spacebetween f-vcenter">
+        <div class="flex f-left">
+          <div id="input-name"></div>
+          <div id="input-size"></div>
+        </div>
+        <div class="flex f-center f-vcenter">
+          <div id="start-type"></div>
+          <img id="right-arrow" src="./img/arrow.svg" alt="right arrow">
+          <select id="image-type">
+            <option value="png" selected="selected">png</option>
+            <option value="jpg">jpg</option>
+            <option value="webp">webp</option>
+            <option value="bmp">bmp</option>
+          </select>
+        </div>
+        <div class="flex f-right">
+          <div id="output-size">0B</div>
+          <div id="output-name"></div>
+        </div>
+      </div>
+      <div class="mh-side flex f-right">
+        <button id="convert">Convert</button>
+      </div>
+    </section>
+    <section class="flex f-spacebetween m-bottom">
+      <div class="m-review m-upload flex f-center f-vcenter">
+        <input type="file" id="upload" class="disable">
+        <img id="img-upload" src="./img/server.svg" alt="upload">
+        <button id="btn-upload">Upload</button>
+        <div id="upload-image" class="review disable"></div>
+      </div>
+      <div class="m-review m-output">
+        <a href="#" id="download" class="disable"></a>
+        <div id="download-image" class="review disable"></div>
+        <button class="disable" id="btn-download"><img class="img-download" src="./img/download.svg" alt="download"></button>
+      </div>
+    </section>
+  </main>
+
+  <script src="./lib/jquery.min.js"></script>
+  <script src="./js/index.js"></script>
+</body>
+
+</html>
