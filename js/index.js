@@ -55,6 +55,8 @@ function handleFiles() {
       let ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
 
+      $("#convert").addClass("ready-convert");
+
       $("#width").on("input", function () {
         let newImgWidth = $(this).val();
         let newImgHeight = newImgWidth / scale;
@@ -112,4 +114,18 @@ $("#upload").on("change", handleFiles);
 
 $("#btn-download").on("click", function () {
   $("#download")[0].click();
+});
+
+$("#image-type").on("change", function () {
+  let destType = $("#image-type option:selected").val();
+  if (destType == "png" || destType == "bmp") {
+    if (!$("#image-quality").prop("disabled")) {
+      $("#image-quality").val(10);
+      $("#image-quality").attr("disabled", "disabled");
+    }
+  } else {
+    if ($("#image-quality").prop("disabled")) {
+      $("#image-quality").prop("disabled", false);
+    }
+  }
 });
