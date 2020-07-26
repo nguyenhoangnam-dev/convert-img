@@ -9,44 +9,63 @@
 </head>
 
 <body class="flex f-center f-vcenter">
-
+  <div class="panel-upload flex f-center f-vcenter" id="panel-upload">
+    <div class="m-upload flex f-center f-vcenter">
+      <input type="file" id="upload" class="disable">
+      <img id="img-upload" src="./img/server.svg" alt="upload">
+      <button id="btn-upload">Upload</button>
+    </div>
+  </div>
   <main class="main">
     <section class="flex f-spacebetween f-vcenter m-top">
-      <div class="mh-side"></div>
-      <div class="mh-mid flex f-spacebetween f-vcenter">
-        <div class="flex f-left">
-          <div id="input-name"></div>
-          <div id="input-size"></div>
-        </div>
-        <div class="flex f-center f-vcenter">
-          <div id="start-type"></div>
-          <img id="right-arrow" src="./img/arrow.svg" alt="right arrow">
-          <select id="image-type">
-            <option value="png" selected="selected">png</option>
-            <option value="jpg">jpg</option>
-            <option value="webp">webp</option>
-            <option value="bmp">bmp</option>
-          </select>
-        </div>
-        <div class="flex f-right">
-          <div id="output-size">0B</div>
-          <div id="output-name"></div>
-        </div>
+      <div class="flex f-left f-vcenter m-top-left">
+        <div id="input-name" class="input-name"></div>
+        <div id="input-size"></div>
+        <img class="right-arrow" src="./img/arrow.svg" alt="right arrow">
+
+        <label for="">Type: </label>
+        <select id="image-type">
+          <option value="png" selected="selected">png</option>
+          <option value="jpg">jpg</option>
+          <option value="webp">webp</option>
+          <option value="bmp">bmp</option>
+        </select>
+        <img class="right-arrow" src="./img/arrow.svg" alt="right arrow">
+
+        <label for="width">Size: </label>
+        <input type="text" name="width" id="width"> px
+        <img class="time-operator" src="./img/time.svg" alt="right arrow">
+        <input type="text" name="height" id="height"> px
+
+        <img class="right-arrow" src="./img/arrow.svg" alt="right arrow">
+
+        <label for="">Quality: </label>
+        <select id="image-quality">
+          <option value="10" selected="selected">10</option>
+          <option value="9">9</option>
+          <option value="8">8</option>
+          <option value="7">7</option>
+          <option value="6">6</option>
+          <option value="5">5</option>
+          <option value="4">4</option>
+          <option value="3">3</option>
+          <option value="2">2</option>
+          <option value="1">1</option>
+        </select>
+
       </div>
-      <div class="mh-side flex f-right">
+      <div class="flex f-right f-vcenter">
+        <div id="output-size">0B</div>
         <button id="convert">Convert</button>
       </div>
     </section>
     <section class="flex f-spacebetween m-bottom">
-      <div class="m-review m-upload flex f-center f-vcenter">
-        <input type="file" id="upload" class="disable">
-        <img id="img-upload" src="./img/server.svg" alt="upload">
-        <button id="btn-upload">Upload</button>
-        <div id="upload-image" class="review disable"></div>
+      <div class="review-box">
+        <img id="upload-image" class="review-image">
       </div>
-      <div class="m-review m-output">
+      <div class="review-box">
         <a href="#" id="download" class="disable"></a>
-        <div id="download-image" class="review disable"></div>
+        <img id="download-image" class="review-image">
         <button class="disable" id="btn-download"><img class="img-download" src="./img/download.svg" alt="download"></button>
       </div>
     </section>
