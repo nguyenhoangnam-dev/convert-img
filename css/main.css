@@ -94,10 +94,21 @@ select:focus {
   background-color: white;
   border: 1px solid #b3b3b3;
   border-radius: 10px;
+  margin-bottom: 20px;
+  padding-right: 20px;
+  padding-left: 20px;
 }
 
 .m-bottom {
-  margin-top: 20px;
+  max-height: 50vh;
+}
+
+.m-compare {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.height50 {
   max-height: 50vh;
 }
 
@@ -143,7 +154,6 @@ select:focus {
   line-height: 25px;
   border: 1px solid #b3b3b3;
   background-color: #efefef;
-  margin-right: 20px;
 }
 
 #convert:hover {
@@ -210,7 +220,7 @@ select:focus {
   height: 30px;
 }
 
-#btn-download {
+.btn-download {
   border: none;
   position: absolute;
   bottom: 40px;
@@ -218,16 +228,14 @@ select:focus {
   background-color: #0cebfa;
   padding: 10px;
   border-radius: 50%;
-  /* border: 1px solid #b3b3b3; */
-  z-index: 2;
+  z-index: 60;
 }
 
-#btn-download:hover {
+.btn-download:hover {
   background-color: #0ca6f0;
 }
 
 .input-name {
-  margin-left: 20px;
   max-width: 200px;
   white-space: nowrap;
   overflow: hidden;
@@ -263,4 +271,24 @@ select:focus {
   height: 100%;
   background-color: #efefef;
   z-index: 10;
+}
+
+.btn-icon {
+  height: 18px;
+}
+
+.btn-top {
+  margin-left: 20px;
+  height: 25px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.btn-select {
+  border: none !important;
+  background-color: #0cfa83 !important;
+}
+
+.btn-select:hover {
+  background-color: #00e3b2 !important;
 }

@@ -7,6 +7,11 @@ function roundBytes(bytes) {
   else return bytes + "B";
 }
 
+function disableZoomIn() {
+  $(".viewer-box").remove();
+  $(".zoom-selector").remove();
+}
+
 function handleFiles() {
   $("#panel-upload").addClass("disable");
 
@@ -25,7 +30,13 @@ function handleFiles() {
     console.log("This file is not an image");
   } else {
     let imageBlob = URL.createObjectURL(image);
-    $("#upload-image").attr("src", imageBlob);
+    $(".upload-image").attr("src", imageBlob);
+
+    $(".beforeafterdefault").cndkbeforeafter({
+      mode: "drag",
+      beforeTextPosition: "top-left",
+      afterTextPosition: "top-right",
+    });
 
     // Create temporary image to get width, height, load event
     let img = document.createElement("img");
@@ -92,8 +103,8 @@ function handleFiles() {
             $("#output-size").text(outputSize);
 
             let newImageBlob = URL.createObjectURL(blob);
-            $("#download-image").attr("src", newImageBlob);
-            $("#btn-download").removeClass("disable");
+            $(".download-image").attr("src", newImageBlob);
+            $(".btn-download").removeClass("disable");
 
             $("#download").attr("download", newFileName);
             $("#download").attr("href", newImageBlob);
@@ -112,7 +123,7 @@ $("#btn-upload").on("click", function () {
 
 $("#upload").on("change", handleFiles);
 
-$("#btn-download").on("click", function () {
+$(".btn-download").on("click", function () {
   $("#download")[0].click();
 });
 
@@ -127,5 +138,42 @@ $("#image-type").on("change", function () {
     if ($("#image-quality").prop("disabled")) {
       $("#image-quality").prop("disabled", false);
     }
+  }
+});
+
+$("#change-preview").on("click", function () {
+  if ($(this).hasClass("btn-select")) {
+    $("#compare-separate").addClass("disable");
+    $("#compare-slider").removeClass("disable");
+
+    $("#zoom-in").addClass("disable");
+    $("#zoom-in").removeClass("btn-select");
+    disableZoomIn();
+
+    $(this).removeClass("btn-select");
+  } else {
+    $("#compare-separate").removeClass("disable");
+    $("#compare-slider").addClass("disable");
+
+    $("#zoom-in").removeClass("disable");
+
+    $(this).addClass("btn-select");
+  }
+});
+
+$("#zoom-in").on("click", function () {
+  if ($(this).hasClass("btn-select")) {
+    disableZoomIn();
+    $(this).removeClass("btn-select");
+  } else {
+    $(function () {
+      $(".magnify").jqZoom({
+        selectorWidth: 100,
+        selectorHeight: 100,
+        viewerWidth: 150,
+        viewerHeight: 150,
+      });
+    });
+    $(this).addClass("btn-select");
   }
 });

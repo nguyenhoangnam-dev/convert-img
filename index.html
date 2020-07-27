@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./lib/cndk.beforeafter.css">
+  <link rel="stylesheet" href="./lib/jquery.jqZoom.css">
   <link rel="stylesheet" href="./css/main.css">
   <title>ConvertIMG</title>
 </head>
@@ -17,6 +19,17 @@
     </div>
   </div>
   <main class="main">
+    <section class="flex f-right f-vcenter m-top">
+      <button class="btn-top disable" id="zoom-in">
+        <img class="btn-icon" src="./img/search.svg" alt="zoom in">
+      </button>
+      <button class="btn-top">
+        <img class="btn-icon" src="./img/server.svg" alt="upload">
+      </button>
+      <button class="btn-top" id="change-preview">
+        <img class="btn-icon" src="./img/compare.svg" alt="compare">
+      </button>
+    </section>
     <section class="flex f-spacebetween f-vcenter m-top">
       <div class="flex f-left f-vcenter m-top-left">
         <div id="input-name" class="input-name"></div>
@@ -59,20 +72,37 @@
         <button id="convert">Convert</button>
       </div>
     </section>
-    <section class="flex f-spacebetween m-bottom">
-      <div class="review-box">
-        <img id="upload-image" class="review-image">
+    <section class="flex f-spacebetween m-bottom disable" id="compare-separate">
+      <div class="review-box zoom-box">
+        <img class="magnify upload-image review-image">
       </div>
-      <div class="review-box">
+      <div class="review-box zoom-box">
         <a href="#" id="download" class="disable"></a>
-        <img id="download-image" class="review-image">
-        <button class="disable" id="btn-download"><img class="img-download" src="./img/download.svg" alt="download"></button>
+        <img class="magnify upload-image download-image review-image">
+        <button class="disable btn-download"><img class="img-download" src="./img/download.svg" alt="download"></button>
       </div>
+    </section>
+    <section class="flex f-center f-vcenter m-bottom " id="compare-slider">
+      <div class="beforeafterdefault m-compare">
+        <div data-type="data-type-image">
+          <div data-type="before">
+            <img class=" upload-image height50">
+          </div>
+          <div data-type="after">
+            <img class="upload-image download-image height50">
+          </div>
+        </div>
+        <button class="disable btn-download"><img class="img-download" src="./img/download.svg" alt="download"></button>
+      </div>
+
     </section>
   </main>
 
   <script src="./lib/jquery.min.js"></script>
+  <script src="./lib/cndk.beforeafter.js"></script>
+  <script src="./lib/jquery.jqZoom.js"></script>
   <script src="./js/index.js"></script>
+
 </body>
 
 </html>
