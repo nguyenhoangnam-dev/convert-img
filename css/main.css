@@ -182,6 +182,10 @@ select:focus {
   background-color: white;
 }
 
+.m-upload-select {
+  border-color: #0cebfa;
+}
+
 .m-review {
   position: relative;
 }
