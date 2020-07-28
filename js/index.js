@@ -2,6 +2,8 @@ let type = document.getElementById("image-type");
 let quality = document.getElementById("image-quality");
 let imagePattern = new RegExp("image/(png|jpeg|webp|bmp)");
 let uploadBox = document.getElementById("upload-box");
+let numberFile = 0;
+let allBlob = [];
 
 //toBlob polyfill
 if (!HTMLCanvasElement.prototype.toBlob) {
@@ -102,6 +104,7 @@ function handleFiles(image) {
 
   let imageBlob = URL.createObjectURL(image);
   $(".upload-image").attr("src", imageBlob);
+  allBlob.push(imageBlob);
 
   $(".beforeafterdefault").cndkbeforeafter({
     mode: "drag",
@@ -195,7 +198,12 @@ $("#upload").on("change", function () {
   const fileList = this.files;
   let image = fileList[0];
 
+  if (allBlob.length > 0) {
+    URL.revokeObjectURL(allBlob[0]);
+  }
+
   checkMIME(image);
+  numberFile++;
 });
 
 $(".btn-download").on("click", function () {
@@ -281,5 +289,14 @@ uploadBox.addEventListener("drop", function (event) {
   let fileList = data.files;
   let image = fileList[0];
 
+  if (allBlob.length > 0) {
+    URL.revokeObjectURL(allBlob[0]);
+  }
+
   checkMIME(image);
+  numberFile++;
+});
+
+$("#upload-more").on("click", function () {
+  $("#panel-upload").removeClass("disable");
 });
