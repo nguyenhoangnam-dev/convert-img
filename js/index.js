@@ -1,6 +1,7 @@
 let type = document.getElementById("image-type");
 let quality = document.getElementById("image-quality");
 let imagePattern = new RegExp("image/(png|jpeg|webp|bmp)");
+let uploadBox = document.getElementById("upload-box");
 
 //toBlob polyfill
 if (!HTMLCanvasElement.prototype.toBlob) {
@@ -63,10 +64,7 @@ function disableZoomIn() {
   $(".zoom-selector").remove();
 }
 
-function checkMIME() {
-  const fileList = this.files;
-  let image = fileList[0];
-
+function checkMIME(image) {
   let inputSize = image.size;
   let inputName = image.name;
   let inputType = image.type;
@@ -189,10 +187,16 @@ function handleFiles(image) {
 }
 
 $("#btn-upload").on("click", function () {
+  $("#upload-box").addClass("m-upload-select");
   $("#upload").click();
 });
 
-$("#upload").on("change", checkMIME);
+$("#upload").on("change", function () {
+  const fileList = this.files;
+  let image = fileList[0];
+
+  checkMIME(image);
+});
 
 $(".btn-download").on("click", function () {
   $("#download")[0].click();
@@ -247,4 +251,35 @@ $("#zoom-in").on("click", function () {
     });
     $(this).addClass("btn-select");
   }
+});
+
+["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+  uploadBox.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+uploadBox.addEventListener("dragenter", function () {
+  this.classList.add("m-upload-select");
+});
+
+uploadBox.addEventListener("dragleave", function () {
+  this.classList.remove("m-upload-select");
+});
+
+uploadBox.addEventListener("dragover", function () {
+  this.classList.add("m-upload-select");
+});
+
+uploadBox.addEventListener("drop", function (event) {
+  this.classList.remove("m-upload-select");
+
+  let data = event.dataTransfer;
+  let fileList = data.files;
+  let image = fileList[0];
+
+  checkMIME(image);
 });
