@@ -1,5 +1,59 @@
 let type = document.getElementById("image-type");
 let quality = document.getElementById("image-quality");
+let imagePattern = new RegExp("image/(png|jpeg|webp|bmp)");
+let uploadBox = document.getElementById("upload-box");
+let numberFile = 0;
+let allBlob = [];
+
+//toBlob polyfill
+if (!HTMLCanvasElement.prototype.toBlob) {
+  Object.defineProperty(HTMLCanvasElement.prototype, "toBlob", {
+    value: function (callback, type, quality) {
+      var dataURL = this.toDataURL(type, quality).split(",")[1];
+      setTimeout(function () {
+        var binStr = atob(dataURL),
+          len = binStr.length,
+          arr = new Uint8Array(len);
+        for (var i = 0; i < len; i++) {
+          arr[i] = binStr.charCodeAt(i);
+        }
+        callback(new Blob([arr], { type: type || "image/png" }));
+      });
+    },
+  });
+}
+
+let MIME = {
+  "image/jpeg": {
+    ext: "jpg",
+    pattern: [0xff, 0xd8, 0xff],
+    mask: [0xff, 0xff, 0xff],
+  },
+  "image/png": {
+    ext: "png",
+    pattern: [0x89, 0x50, 0x4e, 0x47],
+    mask: [0xff, 0xff, 0xff, 0xff],
+  },
+  "image/webp": {
+    ext: "webp",
+    pattern: [0x52, 0x49, 0x46, 0x46],
+    mask: [0xff, 0xff, 0xff, 0xff],
+  },
+  "image/bmp": {
+    ext: "bmp",
+    pattern: [0x42, 0x4d],
+    mask: [0xff, 0xff],
+  },
+};
+
+function check(bytes, mime) {
+  for (var i = 0, l = mime.mask.length; i < l; ++i) {
+    if ((bytes[i] & mime.mask[i]) - mime.pattern[i] !== 0) {
+      return false;
+    }
+  }
+  return true;
+}
 
 function roundBytes(bytes) {
   if (bytes >= 1048576) return Math.round((bytes / 1048576) * 10) / 10 + "MB";
@@ -12,116 +66,145 @@ function disableZoomIn() {
   $(".zoom-selector").remove();
 }
 
-function handleFiles() {
-  $("#panel-upload").addClass("disable");
-
-  const fileList = this.files;
-  let image = fileList[0];
-
+function checkMIME(image) {
   let inputSize = image.size;
   let inputName = image.name;
+  let inputType = image.type;
+  let fileBlob = image.slice(0, 4);
 
   $("#input-name").text(inputName);
   $("#input-size").text(roundBytes(inputSize));
 
-  let imagePattern = new RegExp("image/(png|jpeg|webp|bmp)");
-
-  if (!imagePattern.test(image.type)) {
-    console.log("This file is not an image");
+  // Check mime type
+  if (!imagePattern.test(inputType)) {
+    alert("Invalid image type.");
   } else {
-    let imageBlob = URL.createObjectURL(image);
-    $(".upload-image").attr("src", imageBlob);
+    let reader = new FileReader();
+    reader.readAsArrayBuffer(fileBlob);
 
-    $(".beforeafterdefault").cndkbeforeafter({
-      mode: "drag",
-      beforeTextPosition: "top-left",
-      afterTextPosition: "top-right",
-    });
-
-    // Create temporary image to get width, height, load event
-    let img = document.createElement("img");
-    img.src = imageBlob;
-    img.style.width = "auto";
-    img.style.height = "auto";
-
-    img.onerror = function () {
-      URL.revokeObjectURL(this.src);
-      console.log("Can not load image");
-    };
-
-    img.onload = function (e) {
-      let startType = image.type.split("/")[1];
-      if (startType == "jpeg") startType = "jpg";
-
-      let imgWidth = e.target.width;
-      let imgHeight = e.target.height;
-      let scale = imgWidth / imgHeight;
-
-      $("#width").val(imgWidth);
-      $("#height").val(imgHeight);
-
-      let canvas = document.createElement("canvas");
-      canvas.width = imgWidth;
-      canvas.height = imgHeight;
-      let ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
-
-      $("#convert").addClass("ready-convert");
-
-      $("#width").on("input", function () {
-        let newImgWidth = $(this).val();
-        let newImgHeight = newImgWidth / scale;
-        $("#height").val(newImgHeight);
-
-        canvas.width = newImgWidth;
-        canvas.height = newImgHeight;
-        ctx.drawImage(img, 0, 0, newImgWidth, newImgHeight);
-      });
-
-      $("#height").on("input", function () {
-        let newImgHeight = $(this).val();
-        let newImgWidth = newImgHeight * scale;
-        $("#width").val(newImgWidth);
-
-        canvas.width = newImgWidth;
-        canvas.height = newImgHeight;
-        ctx.drawImage(img, 0, 0, newImgWidth, newImgHeight);
-      });
-
-      $("#convert").on("click", function () {
-        let destType = type.value;
-        let ratio = parseInt(quality.value) / 10;
-
-        let newFileName = image.name.replace(startType, destType);
-
-        if (destType == "jpg") destType = "jpeg";
-
-        canvas.toBlob(
-          function (blob) {
-            let outputSize = roundBytes(blob.size);
-            $("#output-name").text(newFileName);
-            $("#output-size").text(outputSize);
-
-            let newImageBlob = URL.createObjectURL(blob);
-            $(".download-image").attr("src", newImageBlob);
-            $(".btn-download").removeClass("disable");
-
-            $("#download").attr("download", newFileName);
-            $("#download").attr("href", newImageBlob);
-          },
-          "image/" + destType,
-          ratio
-        );
-      });
+    reader.onloadend = function (e) {
+      if (!e.target.error) {
+        let bytes = new Uint8Array(e.target.result);
+        if (check(bytes, MIME[inputType])) {
+          if (inputSize > 52428800) {
+            alert("File should be <= 50MB.");
+          } else {
+            handleFiles(image);
+          }
+        } else {
+          alert("Can not read file.");
+        }
+      }
     };
   }
 }
 
+function handleFiles(image) {
+  $("#panel-upload").addClass("disable");
+
+  let imageBlob = URL.createObjectURL(image);
+  $(".upload-image").attr("src", imageBlob);
+  allBlob.push(imageBlob);
+
+  $(".beforeafterdefault").cndkbeforeafter({
+    mode: "drag",
+    beforeTextPosition: "top-left",
+    afterTextPosition: "top-right",
+  });
+
+  // Create temporary image to get width, height, load event
+  let img = document.createElement("img");
+  img.src = imageBlob;
+  img.style.width = "auto";
+  img.style.height = "auto";
+
+  img.onerror = function () {
+    URL.revokeObjectURL(this.src);
+    alert("Can not load image.");
+  };
+
+  img.onload = function (e) {
+    let startType = MIME[image.type].ext;
+
+    let imgWidth = e.target.width;
+    let imgHeight = e.target.height;
+    let scale = imgWidth / imgHeight;
+
+    $("#width").val(imgWidth);
+    $("#height").val(imgHeight);
+
+    let canvas = document.createElement("canvas");
+    canvas.width = imgWidth;
+    canvas.height = imgHeight;
+    let ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+    $("#convert").addClass("ready-convert");
+
+    $("#width").on("input", function () {
+      let newImgWidth = $(this).val();
+      let newImgHeight = newImgWidth / scale;
+      $("#height").val(newImgHeight);
+
+      canvas.width = newImgWidth;
+      canvas.height = newImgHeight;
+      ctx.drawImage(img, 0, 0, newImgWidth, newImgHeight);
+    });
+
+    $("#height").on("input", function () {
+      let newImgHeight = $(this).val();
+      let newImgWidth = newImgHeight * scale;
+      $("#width").val(newImgWidth);
+
+      canvas.width = newImgWidth;
+      canvas.height = newImgHeight;
+      ctx.drawImage(img, 0, 0, newImgWidth, newImgHeight);
+    });
+
+    $("#convert").on("click", function () {
+      let destType = type.value;
+      let ratio = parseInt(quality.value) / 10;
+
+      let newFileName = image.name.replace(startType, destType);
+
+      if (destType == "jpg") destType = "jpeg";
+
+      canvas.toBlob(
+        function (blob) {
+          let outputSize = roundBytes(blob.size);
+          $("#output-name").text(newFileName);
+          $("#output-size").text(outputSize);
+
+          let newImageBlob = URL.createObjectURL(blob);
+          $(".download-image").attr("src", newImageBlob);
+          $(".btn-download").removeClass("disable");
+
+          $("#download").attr("download", newFileName);
+          $("#download").attr("href", newImageBlob);
+        },
+        "image/" + destType,
+        ratio
+      );
+    });
+  };
+}
+
 $("#btn-upload").on("click", function () {
+  $("#upload-box").addClass("m-upload-select");
   $("#upload").click();
 });
 
-$("#upload").on("change", handleFiles);
+$("#upload").on("change", function () {
+  const fileList = this.files;
+  let image = fileList[0];
+
+  if (allBlob.length > 0) {
+    URL.revokeObjectURL(allBlob[0]);
+  }
+
+  checkMIME(image);
+  numberFile++;
+});
 
 $(".btn-download").on("click", function () {
   $("#download")[0].click();
@@ -176,4 +259,44 @@ $("#zoom-in").on("click", function () {
     });
     $(this).addClass("btn-select");
   }
+});
+
+["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+  uploadBox.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+uploadBox.addEventListener("dragenter", function () {
+  this.classList.add("m-upload-select");
+});
+
+uploadBox.addEventListener("dragleave", function () {
+  this.classList.remove("m-upload-select");
+});
+
+uploadBox.addEventListener("dragover", function () {
+  this.classList.add("m-upload-select");
+});
+
+uploadBox.addEventListener("drop", function (event) {
+  this.classList.remove("m-upload-select");
+
+  let data = event.dataTransfer;
+  let fileList = data.files;
+  let image = fileList[0];
+
+  if (allBlob.length > 0) {
+    URL.revokeObjectURL(allBlob[0]);
+  }
+
+  checkMIME(image);
+  numberFile++;
+});
+
+$("#upload-more").on("click", function () {
+  $("#panel-upload").removeClass("disable");
 });
