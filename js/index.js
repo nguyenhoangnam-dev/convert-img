@@ -139,7 +139,7 @@ function handleFiles(image) {
     let ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
 
-    $("#convert").addClass("ready-convert");
+    $("#convert").addClass("btn-select");
 
     $("#width").on("input", function () {
       let newImgWidth = $(this).val();
@@ -298,5 +298,11 @@ uploadBox.addEventListener("drop", function (event) {
 });
 
 $("#upload-more").on("click", function () {
+  $("#panel-upload").removeClass("disable");
+});
+
+$("#remove-file").on("click", function () {
+  $(this).addClass("btn-select");
+
   $("#panel-upload").removeClass("disable");
 });

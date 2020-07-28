@@ -23,6 +23,7 @@ button:focus {
 
 button {
   cursor: pointer;
+  border: 1px solid;
 }
 
 input {
@@ -160,14 +161,14 @@ select:focus {
   background-color: #b3b3b3;
 }
 
-.ready-convert {
-  border: none !important;
+/* .ready-convert {
   background-color: #0cfa83 !important;
+  border-color: #00e3b2;
 }
 
 .ready-convert:hover {
   background-color: #00e3b2 !important;
-}
+} */
 
 #img-upload {
   width: 20%;
@@ -289,8 +290,8 @@ select:focus {
 }
 
 .btn-select {
-  border: none !important;
   background-color: #0cfa83 !important;
+  border-color: #00e3b2 !important;
 }
 
 .btn-select:hover {
