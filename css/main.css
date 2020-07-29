@@ -280,10 +280,17 @@ p {
 }
 
 .btn-top {
-  margin-left: 20px;
   height: 25px;
   padding-left: 12px;
   padding-right: 12px;
+}
+
+.btn-left {
+  margin-right: 15px;
+}
+
+.btn-right {
+  margin-left: 15px;
 }
 
 .btn-select {

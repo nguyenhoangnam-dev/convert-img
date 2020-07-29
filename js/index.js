@@ -6,8 +6,6 @@ let numberFile = 0;
 let allBlob = [];
 let progressMax = 100;
 
-const ImageLoaderWorker = new Worker("ww_load_image.js");
-
 //toBlob polyfill
 if (!HTMLCanvasElement.prototype.toBlob) {
   Object.defineProperty(HTMLCanvasElement.prototype, "toBlob", {
@@ -188,21 +186,11 @@ function handleFiles(image) {
       let loadingAnimation = setInterval(function () {
         value++;
         $("#progress-bar").val(value);
-        // $("#progress-value").html(value + "%");
 
         if (value == 90) {
           clearInterval(loadingAnimation);
         }
       }, 40);
-
-      // ImageLoaderWorker.postMessage([canvas, "image/" + destType, ratio]);
-
-      // ImageLoaderWorker.addEventListener("message", (event) => {
-      //   const blobData = event.data;
-      //   const objectURL = URL.createObjectURL(blobData.blob);
-
-      //   console.log(objectURL);
-      // });
 
       canvas.toBlob(
         function (blob) {
@@ -229,6 +217,7 @@ function handleFiles(image) {
 }
 
 $("#upload-box").on("click", function (event) {
+  $("#upload-box").addClass("m-upload-select");
   $("#upload").click();
 });
 
@@ -237,6 +226,7 @@ $("#upload").on("click", function (event) {
 });
 
 $("#upload").on("change", function (event) {
+  $("#upload-box").removeClass("m-upload-select");
   const fileList = this.files;
   let image = fileList[0];
 

@@ -18,20 +18,75 @@
     </div>
   </div>
   <main class="main">
-    <section class="flex f-right f-vcenter m-top">
-      <button class="btn-top disable" id="zoom-in">
-        <img class="btn-icon" src="./img/search.svg" alt="zoom in">
-      </button>
-      <button class="btn-top" id="upload-more">
-        <img class="btn-icon" src="./img/server.svg" alt="upload">
-      </button>
-      <button class="btn-top" id="change-preview">
-        <img class="btn-icon" src="./img/compare.svg" alt="compare">
-      </button>
+
+    <!-- More tool -->
+    <section class="flex f-spacebetween f-vcenter m-top">
+
+      <section class="flex f-left f-vcenter">
+        <!-- Zoom-in -->
+        <div class="tooltip">
+          <button class="btn-top btn-left" id="blur">
+            Blur
+          </button>
+          <div class="bottom">
+            <p>Blur convert image.</p>
+            <i></i>
+          </div>
+        </div>
+
+        <!-- Upload file -->
+        <div class="tooltip">
+          <button class="btn-top" id="grayscale">
+            Grayscale
+          </button>
+          <div class="bottom">
+            <p>Grayscale of convert image.</p>
+            <i></i>
+          </div>
+        </div>
+      </section>
+
+      <section class="flex f-right f-vcenter">
+        <!-- Zoom-in -->
+        <div class="tooltip">
+          <button class="btn-top disable" id="zoom-in">
+            <img class="btn-icon" src="./img/search.svg" alt="zoom in">
+          </button>
+          <div class="bottom">
+            <p>Add magnify to zoom in in both original image and convert image. Warning: This only available in preview mode.</p>
+            <i></i>
+          </div>
+        </div>
+
+        <!-- Upload file -->
+        <div class="tooltip">
+          <button class="btn-top btn-right" id="upload-more">
+            <img class="btn-icon" src="./img/server.svg" alt="upload">
+          </button>
+          <div class="bottom">
+            <p>Upload more images. Warning: this is beta tool</p>
+            <i></i>
+          </div>
+        </div>
+
+        <!-- Change mode -->
+        <div class="tooltip">
+          <button class="btn-top btn-right" id="change-preview">
+            <img class="btn-icon" src="./img/compare.svg" alt="compare">
+          </button>
+          <div class="bottom">
+            <p>Change between compare mode and preview mode.</p>
+            <i></i>
+          </div>
+        </div>
+      </section>
     </section>
+
+    <!-- Convert one file -->
     <section class="flex f-spacebetween f-vcenter m-top">
       <div class="flex f-left f-vcenter m-top-left">
 
+        <!-- Input file name -->
         <div class="tooltip">
           <div id="input-name" class="input-name"></div>
           <div class="bottom">
@@ -40,6 +95,7 @@
           </div>
         </div>
 
+        <!-- Input file size -->
         <div class="tooltip">
           <div id="input-size"></div>
           <div class="bottom">
@@ -50,8 +106,7 @@
 
         <img class="right-arrow" src="./img/arrow.svg" alt="right arrow">
 
-        <!-- <label for="">Type: </label> -->
-
+        <!-- Output file type -->
         <div class="tooltip ml-10">
           <select id="image-type">
             <option value="png" selected="selected">png</option>
@@ -65,8 +120,7 @@
           </div>
         </div>
 
-        <!-- <label for="width">Size: </label> -->
-
+        <!-- Output file width and height -->
         <div class="tooltip ml-10">
           <input type="text" name="width" id="width">
           <img class="time-operator" src="./img/time.svg" alt="right arrow">
@@ -77,8 +131,7 @@
           </div>
         </div>
 
-        <!-- <label for="">Quality: </label> -->
-
+        <!-- Output file quality -->
         <div class="tooltip ml-10">
           <select id="image-quality" disabled="disabled">
             <option value="10" selected="selected">10</option>
@@ -100,6 +153,8 @@
 
       </div>
       <div class="flex f-center f-vcenter">
+
+        <!-- Progress bar -->
         <div class="tooltip ml-10">
           <progress id="progress-bar" max="100" value="0"></progress>
           <div class="bottom">
@@ -107,10 +162,10 @@
             <i></i>
           </div>
         </div>
-        <!-- <span id="progress-value">0%</span> -->
       </div>
       <div class="flex f-right f-vcenter">
 
+        <!-- Output file size -->
         <div class="tooltip">
           <div id="output-size">0B</div>
           <div class="bottom">
@@ -119,6 +174,7 @@
           </div>
         </div>
 
+        <!-- Convert button -->
         <div class="tooltip">
           <button id="convert">Convert</button>
           <div class="bottom">
@@ -127,9 +183,9 @@
           </div>
         </div>
 
-
+        <!-- Delete button -->
         <div class="tooltip">
-          <button class="btn-top" id="remove-file">
+          <button class="btn-top btn-right" id="remove-file">
             <img class="btn-icon" src="./img/bin.svg" alt="remove file">
           </button>
           <div class="bottom">
@@ -139,6 +195,8 @@
         </div>
       </div>
     </section>
+
+    <!-- Preview mode -->
     <section class="flex f-spacebetween m-bottom disable" id="compare-separate">
       <div class="review-box zoom-box">
         <img class="magnify upload-image review-image">
@@ -146,9 +204,13 @@
       <div class="review-box zoom-box">
         <a href="#" id="download" class="disable"></a>
         <img class="magnify upload-image download-image review-image">
+
+        <!-- Download button -->
         <button class="disable btn-download"><img class="img-download" src="./img/download.svg" alt="download"></button>
       </div>
     </section>
+
+    <!-- Compare mode -->
     <section class="flex f-center f-vcenter m-bottom " id="compare-slider">
       <div class="beforeafterdefault m-compare">
         <div data-type="data-type-image">
@@ -159,6 +221,8 @@
             <img class="upload-image download-image height50">
           </div>
         </div>
+
+        <!-- Download button -->
         <button class="disable btn-download"><img class="img-download" src="./img/download.svg" alt="download"></button>
       </div>
 
