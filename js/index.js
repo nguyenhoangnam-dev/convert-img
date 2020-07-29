@@ -69,12 +69,10 @@ function disableZoomIn() {
 
 function initializeProgress() {
   $("#progress-bar").val(0);
-  $("#progress-value").html("0%");
 }
 
 function progressDone() {
   $("#progress-bar").val(100);
-  $("#progress-value").html("100%");
 }
 
 function checkMIME(image) {
@@ -174,6 +172,8 @@ function handleFiles(image) {
 
     $("#convert").on("click", function () {
       initializeProgress();
+
+      $("#output-size").text("0B");
       let destType = type.value;
       let ratio = parseInt(quality.value) / 10;
 
@@ -186,9 +186,8 @@ function handleFiles(image) {
       let loadingAnimation = setInterval(function () {
         value++;
         $("#progress-bar").val(value);
-        $("#progress-value").html(value + "%");
 
-        if (value == 100) {
+        if (value == 90) {
           clearInterval(loadingAnimation);
         }
       }, 40);
@@ -196,7 +195,7 @@ function handleFiles(image) {
       canvas.toBlob(
         function (blob) {
           let outputSize = roundBytes(blob.size);
-          $("#output-name").text(newFileName);
+          // $("#output-name").text(newFileName);
           $("#output-size").text(outputSize);
 
           let newImageBlob = URL.createObjectURL(blob);
@@ -217,12 +216,17 @@ function handleFiles(image) {
   };
 }
 
-$("#btn-upload").on("click", function () {
+$("#upload-box").on("click", function (event) {
   $("#upload-box").addClass("m-upload-select");
   $("#upload").click();
 });
 
-$("#upload").on("change", function () {
+$("#upload").on("click", function (event) {
+  event.stopPropagation();
+});
+
+$("#upload").on("change", function (event) {
+  $("#upload-box").removeClass("m-upload-select");
   const fileList = this.files;
   let image = fileList[0];
 
