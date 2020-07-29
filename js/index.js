@@ -6,6 +6,8 @@ let numberFile = 0;
 let allBlob = [];
 let progressMax = 100;
 
+const ImageLoaderWorker = new Worker("ww_load_image.js");
+
 //toBlob polyfill
 if (!HTMLCanvasElement.prototype.toBlob) {
   Object.defineProperty(HTMLCanvasElement.prototype, "toBlob", {
@@ -69,12 +71,10 @@ function disableZoomIn() {
 
 function initializeProgress() {
   $("#progress-bar").val(0);
-  $("#progress-value").html("0%");
 }
 
 function progressDone() {
   $("#progress-bar").val(100);
-  $("#progress-value").html("100%");
 }
 
 function checkMIME(image) {
@@ -174,6 +174,8 @@ function handleFiles(image) {
 
     $("#convert").on("click", function () {
       initializeProgress();
+
+      $("#output-size").text("0B");
       let destType = type.value;
       let ratio = parseInt(quality.value) / 10;
 
@@ -186,17 +188,26 @@ function handleFiles(image) {
       let loadingAnimation = setInterval(function () {
         value++;
         $("#progress-bar").val(value);
-        $("#progress-value").html(value + "%");
+        // $("#progress-value").html(value + "%");
 
-        if (value == 100) {
+        if (value == 90) {
           clearInterval(loadingAnimation);
         }
       }, 40);
 
+      // ImageLoaderWorker.postMessage([canvas, "image/" + destType, ratio]);
+
+      // ImageLoaderWorker.addEventListener("message", (event) => {
+      //   const blobData = event.data;
+      //   const objectURL = URL.createObjectURL(blobData.blob);
+
+      //   console.log(objectURL);
+      // });
+
       canvas.toBlob(
         function (blob) {
           let outputSize = roundBytes(blob.size);
-          $("#output-name").text(newFileName);
+          // $("#output-name").text(newFileName);
           $("#output-size").text(outputSize);
 
           let newImageBlob = URL.createObjectURL(blob);
@@ -217,12 +228,15 @@ function handleFiles(image) {
   };
 }
 
-$("#btn-upload").on("click", function () {
-  $("#upload-box").addClass("m-upload-select");
+$("#upload-box").on("click", function (event) {
   $("#upload").click();
 });
 
-$("#upload").on("change", function () {
+$("#upload").on("click", function (event) {
+  event.stopPropagation();
+});
+
+$("#upload").on("change", function (event) {
   const fileList = this.files;
   let image = fileList[0];
 

@@ -32,9 +32,8 @@ input {
   line-height: 25px;
   border: 1px solid #b3b3b3;
   cursor: pointer;
+  padding: 0;
   padding-left: 5px;
-  margin-left: 5px;
-  margin-right: 5px;
 }
 
 input:focus {
@@ -42,16 +41,19 @@ input:focus {
 }
 
 select {
-  height: 25px;
+  height: 27px; /* Because of box-sizing: border box, height ought to plus 2px */
   font-size: 16px;
   line-height: 25px;
   border: 1px solid #b3b3b3;
   cursor: pointer;
-  margin-left: 5px;
 }
 
 select:focus {
   outline: none;
+}
+
+p {
+  margin: 0;
 }
 
 /* Component */
@@ -82,6 +84,10 @@ select:focus {
 
 .disable {
   display: none;
+}
+
+.ml-10 {
+  margin-left: 10px;
 }
 
 /* Other */
@@ -130,18 +136,15 @@ select:focus {
 
 .right-arrow {
   width: 20px;
-  margin-left: 15px;
-  margin-right: 15px;
+  margin-left: 10px;
 }
 
 .time-operator {
   width: 10px;
-  margin-left: 5px;
-  margin-right: 5px;
 }
 
 #image-type {
-  width: 80px;
+  width: 65px;
 }
 
 #image-quality {
@@ -160,15 +163,6 @@ select:focus {
 #convert:hover {
   background-color: #b3b3b3;
 }
-
-/* .ready-convert {
-  background-color: #0cfa83 !important;
-  border-color: #00e3b2;
-}
-
-.ready-convert:hover {
-  background-color: #00e3b2 !important;
-} */
 
 #img-upload {
   width: 20%;
@@ -248,24 +242,23 @@ select:focus {
 }
 
 #output-size {
-  width: 50px;
-  margin-right: 20px;
+  width: 70px;
+  margin-right: 10px;
   text-align: right;
 }
 
 #input-size {
-  width: 50px;
-  margin-left: 15px;
+  width: 70px;
+  text-align: right;
 }
 
 #width,
 #height {
-  width: 50px;
+  width: 38px;
 }
 
 .m-top-left {
   max-width: 75%;
-  overflow: hidden;
 }
 
 .panel-upload {
@@ -275,7 +268,11 @@ select:focus {
   width: 100%;
   height: 100%;
   background-color: #efefef;
-  z-index: 20;
+  z-index: 100;
+}
+
+#upload-box {
+  cursor: pointer;
 }
 
 .btn-icon {
@@ -298,10 +295,12 @@ select:focus {
   background-color: #00e3b2 !important;
 }
 
+/* Progress bar */
+
 progress {
   background-color: #efefef;
   border: 0;
-  width: 200px;
+  width: 180px;
   height: 18px;
   border-radius: 9px;
   margin-right: 10px;
@@ -346,4 +345,56 @@ progress::-moz-progress-bar {
   background: linear-gradient(to bottom, #0cfa83 0%, #00e3b2 100%);
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0cfa83', endColorstr='#00e3b2',GradientType=0 );
   border-radius: 9px;
+}
+
+/* Tooltip menu */
+
+.tooltip {
+  position: relative;
+}
+
+.tooltip .bottom {
+  min-width: 200px;
+  top: 30px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  padding: 10px;
+  color: #000000;
+  background-color: #ffffff;
+  font-weight: normal;
+  font-size: 12px;
+  border-radius: 5px;
+  position: absolute;
+  z-index: 99999999;
+  box-sizing: border-box;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.tooltip:hover .bottom {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip .bottom i {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -12px;
+  width: 16px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.tooltip .bottom i::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  left: 50%;
+  transform: translate(-50%, 50%) rotate(45deg);
+  background-color: #ffffff;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }

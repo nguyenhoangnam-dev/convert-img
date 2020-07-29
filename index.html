@@ -15,7 +15,6 @@
     <div class="m-upload flex f-center f-vcenter" id="upload-box">
       <input type="file" id="upload" class="disable">
       <img id="img-upload" src="./img/server.svg" alt="upload">
-      <button id="btn-upload">Upload</button>
     </div>
   </div>
   <main class="main">
@@ -32,51 +31,112 @@
     </section>
     <section class="flex f-spacebetween f-vcenter m-top">
       <div class="flex f-left f-vcenter m-top-left">
-        <div id="input-name" class="input-name"></div>
-        <div id="input-size"></div>
+
+        <div class="tooltip">
+          <div id="input-name" class="input-name"></div>
+          <div class="bottom">
+            <p>Name of original image.</p>
+            <i></i>
+          </div>
+        </div>
+
+        <div class="tooltip">
+          <div id="input-size"></div>
+          <div class="bottom">
+            <p>Size of original image.</p>
+            <i></i>
+          </div>
+        </div>
+
         <img class="right-arrow" src="./img/arrow.svg" alt="right arrow">
 
-        <label for="">Type: </label>
-        <select id="image-type">
-          <option value="png" selected="selected">png</option>
-          <option value="jpg">jpg</option>
-          <option value="webp">webp</option>
-          <option value="bmp">bmp</option>
-        </select>
-        <img class="right-arrow" src="./img/arrow.svg" alt="right arrow">
+        <!-- <label for="">Type: </label> -->
 
-        <label for="width">Size: </label>
-        <input type="text" name="width" id="width"> px
-        <img class="time-operator" src="./img/time.svg" alt="right arrow">
-        <input type="text" name="height" id="height"> px
+        <div class="tooltip ml-10">
+          <select id="image-type">
+            <option value="png" selected="selected">png</option>
+            <option value="jpg">jpg</option>
+            <option value="webp">webp</option>
+            <option value="bmp" disabled>bmp</option>
+          </select>
+          <div class="bottom">
+            <p>Select option for output file type.</p>
+            <i></i>
+          </div>
+        </div>
 
-        <img class="right-arrow" src="./img/arrow.svg" alt="right arrow">
+        <!-- <label for="width">Size: </label> -->
 
-        <label for="">Quality: </label>
-        <select id="image-quality" disabled="disabled">
-          <option value="10" selected="selected">10</option>
-          <option value="9">9</option>
-          <option value="8">8</option>
-          <option value="7">7</option>
-          <option value="6">6</option>
-          <option value="5">5</option>
-          <option value="4">4</option>
-          <option value="3">3</option>
-          <option value="2">2</option>
-          <option value="1">1</option>
-        </select>
+        <div class="tooltip ml-10">
+          <input type="text" name="width" id="width">
+          <img class="time-operator" src="./img/time.svg" alt="right arrow">
+          <input type="text" name="height" id="height">
+          <div class="bottom">
+            <p>Change width and height of output file without change scale of original image.</p>
+            <i></i>
+          </div>
+        </div>
+
+        <!-- <label for="">Quality: </label> -->
+
+        <div class="tooltip ml-10">
+          <select id="image-quality" disabled="disabled">
+            <option value="10" selected="selected">10</option>
+            <option value="9">9</option>
+            <option value="8">8</option>
+            <option value="7">7</option>
+            <option value="6">6</option>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+          </select>
+          <div class="bottom">
+            <p>Change quality of output file. Warning: Can not change quality of png and bmp because of lossless type.</p>
+            <i></i>
+          </div>
+        </div>
 
       </div>
       <div class="flex f-center f-vcenter">
-        <progress id="progress-bar" max="100" value="0"></progress>
-        <span id="progress-value">0%</span>
+        <div class="tooltip ml-10">
+          <progress id="progress-bar" max="100" value="0"></progress>
+          <div class="bottom">
+            <p>Progress bar of convert image.</p>
+            <i></i>
+          </div>
+        </div>
+        <!-- <span id="progress-value">0%</span> -->
       </div>
       <div class="flex f-right f-vcenter">
-        <div id="output-size">0B</div>
-        <button id="convert">Convert</button>
-        <button class="btn-top" id="remove-file">
-          <img class="btn-icon" src="./img/bin.svg" alt="remove file">
-        </button>
+
+        <div class="tooltip">
+          <div id="output-size">0B</div>
+          <div class="bottom">
+            <p>Size of file after convert the original image.</p>
+            <i></i>
+          </div>
+        </div>
+
+        <div class="tooltip">
+          <button id="convert">Convert</button>
+          <div class="bottom">
+            <p>Click to start convert the original image.</p>
+            <i></i>
+          </div>
+        </div>
+
+
+        <div class="tooltip">
+          <button class="btn-top" id="remove-file">
+            <img class="btn-icon" src="./img/bin.svg" alt="remove file">
+          </button>
+          <div class="bottom">
+            <p>Click to delete the original image. Warning: Can not undo this action.</p>
+            <i></i>
+          </div>
+        </div>
       </div>
     </section>
     <section class="flex f-spacebetween m-bottom disable" id="compare-separate">
