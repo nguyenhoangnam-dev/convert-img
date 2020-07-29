@@ -4,6 +4,7 @@ let imagePattern = new RegExp("image/(png|jpeg|webp|bmp)");
 let uploadBox = document.getElementById("upload-box");
 let numberFile = 0;
 let allBlob = [];
+let progressMax = 100;
 
 //toBlob polyfill
 if (!HTMLCanvasElement.prototype.toBlob) {
@@ -64,6 +65,16 @@ function roundBytes(bytes) {
 function disableZoomIn() {
   $(".viewer-box").remove();
   $(".zoom-selector").remove();
+}
+
+function initializeProgress() {
+  $("#progress-bar").val(0);
+  $("#progress-value").html("0%");
+}
+
+function progressDone() {
+  $("#progress-bar").val(100);
+  $("#progress-value").html("100%");
 }
 
 function checkMIME(image) {
@@ -139,7 +150,7 @@ function handleFiles(image) {
     let ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
 
-    $("#convert").addClass("ready-convert");
+    $("#convert").addClass("btn-select");
 
     $("#width").on("input", function () {
       let newImgWidth = $(this).val();
@@ -162,12 +173,25 @@ function handleFiles(image) {
     });
 
     $("#convert").on("click", function () {
+      initializeProgress();
       let destType = type.value;
       let ratio = parseInt(quality.value) / 10;
 
       let newFileName = image.name.replace(startType, destType);
 
       if (destType == "jpg") destType = "jpeg";
+
+      let value = 0;
+
+      let loadingAnimation = setInterval(function () {
+        value++;
+        $("#progress-bar").val(value);
+        $("#progress-value").html(value + "%");
+
+        if (value == 100) {
+          clearInterval(loadingAnimation);
+        }
+      }, 40);
 
       canvas.toBlob(
         function (blob) {
@@ -181,6 +205,10 @@ function handleFiles(image) {
 
           $("#download").attr("download", newFileName);
           $("#download").attr("href", newImageBlob);
+
+          clearInterval(loadingAnimation);
+
+          progressDone();
         },
         "image/" + destType,
         ratio
@@ -298,5 +326,11 @@ uploadBox.addEventListener("drop", function (event) {
 });
 
 $("#upload-more").on("click", function () {
+  $("#panel-upload").removeClass("disable");
+});
+
+$("#remove-file").on("click", function () {
+  $(this).addClass("btn-select");
+
   $("#panel-upload").removeClass("disable");
 });
