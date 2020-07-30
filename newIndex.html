@@ -35,9 +35,9 @@
           </button>
         </div>
       </header>
-      <div id="preview-mode" class="w-100 h-100">
+      <div id="preview-mode" class="w-100">
         <div class="review-box zoom-box">
-          <img class="magnify upload-image review-image disable" data-review-image='0'>
+          <img class="magnify upload-image output-image review-image disable" data-review-image='0'>
         </div>
       </div>
       <div id="compare-mode" class="w-100 h-100">
@@ -100,8 +100,8 @@
       </div>
     </section>
   </main>
-  <footer>
-
+  <footer class="flex f-left f-vcenter">
+    <progress class="ml-10" id="progress-bar" max="100" value="0"></progress>
   </footer>
   <script src="./lib/jquery.min.js"></script>
   <script src="./js/newIndex.js"></script>

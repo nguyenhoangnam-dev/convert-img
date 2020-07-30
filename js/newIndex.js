@@ -4,6 +4,7 @@ let imagePattern = new RegExp("image/(png|jpeg|webp|bmp)");
 
 let allBlob = [];
 let imageId = 0;
+// let loadingAnimation;
 
 let ua = navigator.userAgent.toLowerCase();
 let checkBrowser = function (r) {
@@ -81,17 +82,33 @@ function roundBytes(bytes) {
 //   $(".zoom-selector").remove();
 // }
 
-// function initializeProgress() {
-//   $("#progress-bar").val(0);
-// }
+function initializeProgress() {
+  $("#progress-bar").val(0);
+}
 
-// function progressDone() {
-//   $("#progress-bar").val(100);
-// }
+function progressDone() {
+  $("#progress-bar").val(100);
+}
+
+function renderImage(canvas, type, ratio, loading) {
+  canvas.toBlob(
+    function (blob) {
+      let newImageBlob = URL.createObjectURL(blob);
+      $(".output-image").attr("src", newImageBlob);
+
+      clearInterval(loading);
+
+      progressDone();
+    },
+    "image/" + "png",
+    ratio
+  );
+}
+
+function setFilter(ctx, type, value) {}
 
 function checkMIME(image) {
   let inputSize = image.size;
-  let inputName = image.name;
   let inputType = image.type;
   let fileBlob = image.slice(0, 4);
 
@@ -151,10 +168,10 @@ function handleFiles(image) {
   img.style.width = "auto";
   img.style.height = "auto";
 
-  // img.onerror = function () {
-  //   URL.revokeObjectURL(this.src);
-  //   alert("Can not load image.");
-  // };
+  img.onerror = function () {
+    URL.revokeObjectURL(this.src);
+    alert("Can not load image.");
+  };
 
   img.onload = function (event) {
     let imgWidth = event.target.width;
@@ -163,10 +180,140 @@ function handleFiles(image) {
     if (imgWidth >= imgHeight) {
       $(".upload-image").addClass("w-100");
     } else {
-      $(".upload-image").addClass("h-100");
+      $(".review-box").addClass("hp-100");
+      $(".upload-image").addClass("hp-100");
     }
 
     $(".upload-image").removeClass("disable");
+
+    let startType = MIME[image.type].ext;
+    let startMime = image.type;
+
+    let scale = imgWidth / imgHeight;
+
+    // $("#width").val(imgWidth);
+    // $("#height").val(imgHeight);
+
+    let canvas = document.createElement("canvas");
+    canvas.width = imgWidth;
+    canvas.height = imgHeight;
+    let ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+    let ratio = 1;
+    var timeOutID = undefined;
+
+    $("#contrast").on("input", function () {
+      let value = $(this).val();
+      $("#contrast-value").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        ctx.filter = `contrast(${value}%)`;
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress();
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, ratio, loadingAnimation);
+      }, 200);
+    });
+
+    $("#contrast-value").on("change", function () {
+      let value = $(this).val();
+      $("#contrast").val(value);
+
+      ctx.filter = `contrast(${value}%)`;
+      ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        initializeProgress();
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, ratio, loadingAnimation);
+      }, 200);
+    });
+
+    $("#brightness").on("input", function () {
+      let value = $(this).val();
+      $("#brightness-value").val(value);
+
+      ctx.filter = `brightness(${value}%)`;
+      ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        initializeProgress();
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, ratio, loadingAnimation);
+      }, 200);
+    });
+
+    $("#brightness-value").on("change", function () {
+      let value = $(this).val();
+      $("#brightness").val(value);
+
+      ctx.filter = `brightness(${value}%)`;
+      ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        initializeProgress();
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, ratio, loadingAnimation);
+      }, 200);
+    });
   };
 
   // img.onload = function (e) {
@@ -278,14 +425,6 @@ $(".btn-exist").on("click", function (event) {
   $(this).parent().remove();
 });
 
-$("#contrast").on("input", function () {
-  $("#contrast-value").val($(this).val());
-});
-
-$("#contrast-value").on("change", function () {
-  $("#contrast").val($(this).val());
-});
-
 // Click to upload file
 uploadBox.addEventListener("click", function () {
   this.classList.add("m-upload-select");
@@ -342,4 +481,33 @@ uploadBox.addEventListener("drop", function (event) {
   }
 
   checkMIME(image);
+});
+
+// Drag scrolling preview mode
+
+let slider = document.getElementById("preview-mode");
+let isDown = false;
+let startY;
+let scrollTop;
+
+slider.addEventListener("mousedown", (e) => {
+  isDown = true;
+  slider.classList.add("drag-active");
+  startY = e.pageY - slider.offsetTop;
+  scrollTop = slider.scrollTop;
+});
+slider.addEventListener("mouseleave", () => {
+  isDown = false;
+  slider.classList.remove("drag-active");
+});
+slider.addEventListener("mouseup", () => {
+  isDown = false;
+  slider.classList.remove("drag-active");
+});
+slider.addEventListener("mousemove", (e) => {
+  if (!isDown) return;
+  e.preventDefault();
+  const y = e.pageY - slider.offsetTop;
+  const walk = y - startY;
+  slider.scrollTop = scrollTop - walk;
 });

@@ -3,7 +3,7 @@
 *,
 *::before,
 *::after {
-  box-sizing: 0;
+  box-sizing: border-box;
 }
 
 html,
@@ -43,7 +43,8 @@ main {
 
 footer {
   height: 25px;
-  background-color: tomato;
+  border-top: 1px solid #b3b3b3;
+  background-color: white;
 }
 
 input[type="range"] {
@@ -141,7 +142,7 @@ input:focus {
 }
 
 .i-val {
-  width: 22px;
+  width: 32px;
   margin-right: 5px;
   text-align: right;
 }
@@ -288,4 +289,73 @@ input:focus {
 .review-box {
   display: flex;
   justify-content: center;
+  /* overflow-y: auto; */
+}
+
+#preview-mode {
+  overflow-y: auto;
+  height: calc(100% - 36px);
+}
+
+.drag-active {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}
+
+/* Progress bar */
+
+progress {
+  background-color: #b3b3b3;
+  border: 0;
+  width: 180px;
+  height: 18px;
+  border-radius: 9px;
+  margin-right: 10px;
+}
+
+progress::-webkit-progress-bar {
+  background-color: #efefef;
+  border-radius: 9px;
+}
+
+progress::-webkit-progress-value {
+  background: rgb(255, 99, 71);
+  /* background: -moz-linear-gradient(
+    90deg,
+    rgba(255, 99, 71, 1) 0%,
+    rgba(12, 250, 131, 1) 100%
+  );
+  background: -webkit-linear-gradient(
+    90deg,
+    rgba(255, 99, 71, 1) 0%,
+    rgba(12, 250, 131, 1) 100%
+  );
+  background: linear-gradient(
+    90deg,
+    rgba(255, 99, 71, 1) 0%,
+    rgba(12, 250, 131, 1) 100%
+  );
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ff6347",endColorstr="#0cfa83",GradientType=1); */
+  border-radius: 9px;
+}
+
+progress::-moz-progress-bar {
+  background: rgb(255, 99, 71);
+  /* background: -moz-linear-gradient(
+    90deg,
+    rgba(255, 99, 71, 1) 0%,
+    rgba(12, 250, 131, 1) 100%
+  );
+  background: -webkit-linear-gradient(
+    90deg,
+    rgba(255, 99, 71, 1) 0%,
+    rgba(12, 250, 131, 1) 100%
+  );
+  background: linear-gradient(
+    90deg,
+    rgba(255, 99, 71, 1) 0%,
+    rgba(12, 250, 131, 1) 100%
+  );
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ff6347",endColorstr="#0cfa83",GradientType=1); */
+  border-radius: 9px;
 }
