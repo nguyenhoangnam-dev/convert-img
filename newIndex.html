@@ -4,26 +4,107 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/newMain.css">
   <title>Process image</title>
 </head>
 
-<body>
-  <header class="flex f-left f-vcenter">
-    <div id="logo">
-
+<body class="flex f-column f-spacebetween">
+  <div class="panel-upload flex f-center f-vcenter" id="panel-upload">
+    <div class="m-upload flex f-center f-vcenter" id="upload-box">
+      <input type="file" id="upload" class="disable">
+      <img id="icon-upload" src="./img/server.svg" alt="upload">
     </div>
-    <div class="image-tag">
-      <div class="image-name"></div>
-    </div>
-  </header>
-  <main>
-    <section>
+  </div>
+  <main class="flex">
+    <section class="w-80">
+      <header class="flex f-spacebetween f-vcenter header">
+        <div class="flex f-left f-vcenter hp-100 " id="navbar">
+          <div id="logo">
+            <img class="icon-l" src="./img/process.svg" alt="logo">
+          </div>
+        </div>
+        <div class="flex f-right f-vcenter tool-box hp-100 ">
+          <button class="tool-item flex f-center f-vcenter hp-100" id="zoom-in">
+            <img class="icon-m" src="./img/search.svg" alt="zoom in">
+          </button>
+          <button class="tool-item flex f-center f-vcenter hp-100" id="upload-new">
+            <img class="icon-m" src="./img/server.svg" alt="upload new file">
+          </button>
+          <button class="tool-item flex f-center f-vcenter hp-100" id="change-view">
+            <img class="icon-m" src="./img/compare.svg" alt="change view mode">
+          </button>
+        </div>
+      </header>
+      <div id="preview-mode" class="w-100 h-100">
+        <div class="review-box zoom-box">
+          <img class="magnify upload-image review-image disable" data-review-image='0'>
+        </div>
+      </div>
+      <div id="compare-mode" class="w-100 h-100">
 
+      </div>
     </section>
-    <section>
-
+    <section class="w-20 side-bar flex f-column f-vcenter">
+      <div class="tool flex">
+        <div class="tool-name">Contrast: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="contrast" class="slider" min="0" max="100" value="100">
+        </div>
+        <div class="tool-value flex f-vcenter">
+          <input type="text" class="i-val" value="100" id="contrast-value"> %
+        </div>
+      </div>
+      <div class="tool flex">
+        <div class="tool-name">Brightness: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="brightness" class="slider" min="0" max="100" value="100">
+        </div>
+        <div class="tool-value flex f-vcenter">
+          <input type="text" class="i-val" value="100" id="brightness-value"> %
+        </div>
+      </div>
+      <div class="tool flex">
+        <div class="tool-name">Blur: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="blur" class="slider" min="0" max="100" value="0">
+        </div>
+        <div class="tool-value flex f-vcenter">
+          <input type="text" class="i-val" value="0" id="blur-value"> %
+        </div>
+      </div>
+      <div class="tool flex">
+        <div class="tool-name">Opacity: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="opacity" class="slider" min="0" max="100" value="100">
+        </div>
+        <div class="tool-value flex f-vcenter">
+          <input type="text" class="i-val" value="100" id="opacity-value"> %
+        </div>
+      </div>
+      <div class="tool flex">
+        <div class="tool-name">Saturate: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="saturate" class="slider" min="0" max="100" value="100">
+        </div>
+        <div class="tool-value flex f-vcenter">
+          <input type="text" class="i-val" value="100" id="saturate-value"> %
+        </div>
+      </div>
+      <div class="mt-20">
+        <button class="btn-border btn-hover" id="export">
+          Export
+        </button>
+        <button class="btn-border btn-hover" id="reset">
+          Reset
+        </button>
+      </div>
     </section>
   </main>
+  <footer>
+
+  </footer>
+  <script src="./lib/jquery.min.js"></script>
+  <script src="./js/newIndex.js"></script>
 </body>
 
 </html>

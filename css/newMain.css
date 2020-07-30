@@ -1,0 +1,291 @@
+/* Overload default setting */
+
+*,
+*::before,
+*::after {
+  box-sizing: 0;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #efefef;
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
+  font-size: 15px;
+}
+
+button:focus {
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  font-size: 15px;
+}
+
+header {
+  height: 35px;
+  background-color: white;
+}
+
+main {
+  height: calc(100% - 25px);
+}
+
+footer {
+  height: 25px;
+  background-color: tomato;
+}
+
+input[type="range"] {
+  margin: 0;
+}
+
+input:focus {
+  outline: none;
+}
+
+/* Component */
+
+.flex {
+  display: flex;
+}
+
+.f-column {
+  flex-direction: column;
+}
+
+.f-center {
+  justify-content: center;
+}
+
+.f-left {
+  justify-content: flex-start;
+}
+
+.f-right {
+  justify-content: flex-end;
+}
+
+.f-spacebetween {
+  justify-content: space-between;
+}
+
+.f-vcenter {
+  align-items: center;
+}
+
+.icon-s {
+  height: 8px;
+}
+
+.icon-m {
+  height: 15px;
+}
+
+.icon-l {
+  height: 20px;
+}
+
+#icon-upload {
+  width: 20%;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.h-100 {
+  height: 100vh;
+}
+
+.hp-100 {
+  height: 100%;
+}
+
+.w-80 {
+  width: 80%;
+}
+
+.w-20 {
+  width: 20%;
+}
+
+.btn-border {
+  border: 1px solid #b3b3b3;
+}
+
+.btn-hover:hover {
+  background-color: #efefef;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.ml-10 {
+  margin-left: 10px;
+}
+
+.mr-10 {
+  margin-right: 10px;
+}
+
+.i-val {
+  width: 22px;
+  margin-right: 5px;
+  text-align: right;
+}
+
+.disable {
+  display: none;
+}
+
+/* Other */
+
+#logo {
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+.header {
+  border-bottom: 1px solid #b3b3b3;
+}
+
+.image-tag {
+  max-width: 180px;
+  min-width: 120px;
+  border-left: 1px solid #b3b3b3;
+  border-right: 1px solid #b3b3b3;
+  padding-left: 8px;
+  cursor: pointer;
+}
+
+.image-tag:hover {
+  background-color: #efefef;
+}
+
+.image-selected {
+  background-color: #efefef;
+}
+
+.image-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tool {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.tool-box {
+  margin-right: 15px;
+}
+
+.tool-name {
+  width: 100px;
+}
+
+.tool-value {
+  width: 50px;
+  text-align: right;
+  margin-left: 10px;
+}
+
+.side-bar {
+  background-color: white;
+  border-left: 1px solid #b3b3b3;
+  padding-top: 40px;
+}
+
+/* Upload panel */
+
+.m-upload {
+  flex-direction: column;
+  width: 60%;
+  height: 60%;
+  border: 8px dashed #b3b3b3;
+  border-radius: 20px;
+  background-color: white;
+}
+
+.m-upload-select {
+  border-color: #0cebfa;
+}
+
+.panel-upload {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #efefef;
+  z-index: 100;
+}
+
+#upload-box {
+  cursor: pointer;
+}
+
+/* Slider */
+
+.slidecontainer {
+  width: 30%; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+  -webkit-appearance: none; /* Override default CSS styles */
+  appearance: none;
+  width: 100%; /* Full-width */
+  height: 10px; /* Specified height */
+  background: #d3d3d3; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: 0.2s; /* 0.2 seconds transition on hover */
+  transition: opacity 0.2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 24px;
+  border: 0;
+  border-radius: 3px;
+  background: #0cfa83;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 10px;
+  height: 24px;
+  border: 0;
+  border-radius: 3px;
+  background: #0cfa83;
+  cursor: pointer;
+}
+
+/* Preview mode */
+
+.review-box {
+  display: flex;
+  justify-content: center;
+}
