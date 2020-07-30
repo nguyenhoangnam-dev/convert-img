@@ -6,6 +6,16 @@ let numberFile = 0;
 let allBlob = [];
 let progressMax = 100;
 
+let ua = navigator.userAgent.toLowerCase();
+let checkBrowser = function (r) {
+  return r.test(ua);
+};
+
+let isOpera = checkBrowser(/opera/);
+let isChrome = checkBrowser(/chrome/);
+let isWebKit = checkBrowser(/webkit/);
+let isSafari = !isChrome && checkBrowser(/safari/);
+
 //toBlob polyfill
 if (!HTMLCanvasElement.prototype.toBlob) {
   Object.defineProperty(HTMLCanvasElement.prototype, "toBlob", {
@@ -22,6 +32,11 @@ if (!HTMLCanvasElement.prototype.toBlob) {
       });
     },
   });
+}
+
+// Safari and opera not support canvas filter.
+if (isSafari || isOpera) {
+  $("#blur").prop("disabled", true);
 }
 
 let MIME = {
@@ -153,6 +168,10 @@ function handleFiles(image) {
     $("#width").on("input", function () {
       let newImgWidth = $(this).val();
       let newImgHeight = newImgWidth / scale;
+
+      imgWidth = newImgWidth;
+      imgHeight = newImgHeight;
+
       $("#height").val(newImgHeight);
 
       canvas.width = newImgWidth;
@@ -163,11 +182,20 @@ function handleFiles(image) {
     $("#height").on("input", function () {
       let newImgHeight = $(this).val();
       let newImgWidth = newImgHeight * scale;
+
+      imgWidth = newImgWidth;
+      imgHeight = newImgHeight;
+
       $("#width").val(newImgWidth);
 
       canvas.width = newImgWidth;
       canvas.height = newImgHeight;
       ctx.drawImage(img, 0, 0, newImgWidth, newImgHeight);
+    });
+
+    $("#blur").on("click", function () {
+      ctx.filter = "blur(10px)";
+      ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
     });
 
     $("#convert").on("click", function () {
