@@ -47,12 +47,40 @@ footer {
   background-color: white;
 }
 
+input[type="text"] {
+  height: 24px;
+  font-size: 15px;
+  line-height: 22px;
+  border: 1px solid #b3b3b3;
+  cursor: pointer;
+}
+
 input[type="range"] {
   margin: 0;
 }
 
 input:focus {
   outline: none;
+}
+
+select {
+  height: 24px; /* Because of box-sizing: border box, height ought to plus 2px */
+  font-size: 15px;
+  line-height: 22px;
+  border: 1px solid #b3b3b3;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: none;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
 }
 
 /* Component */
@@ -141,10 +169,22 @@ input:focus {
   margin-right: 10px;
 }
 
+.ml-5 {
+  margin-left: 5px;
+}
+
+.mr-5 {
+  margin-right: 5px;
+}
+
 .i-val {
   width: 32px;
   margin-right: 5px;
   text-align: right;
+}
+
+.i-4 {
+  width: 40px;
 }
 
 .disable {
@@ -242,25 +282,23 @@ input:focus {
 /* Slider */
 
 .slidecontainer {
-  width: 30%; /* Width of the outside container */
+  width: 30%;
 }
 
-/* The slider itself */
 .slider {
-  -webkit-appearance: none; /* Override default CSS styles */
+  -webkit-appearance: none;
   appearance: none;
-  width: 100%; /* Full-width */
-  height: 10px; /* Specified height */
-  background: #d3d3d3; /* Grey background */
-  outline: none; /* Remove outline */
-  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-  -webkit-transition: 0.2s; /* 0.2 seconds transition on hover */
+  width: 100%;
+  height: 10px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: 0.2s;
   transition: opacity 0.2s;
 }
 
-/* Mouse-over effects */
 .slider:hover {
-  opacity: 1; /* Fully shown on mouse-over */
+  opacity: 1;
 }
 
 /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
@@ -289,7 +327,6 @@ input:focus {
 .review-box {
   display: flex;
   justify-content: center;
-  /* overflow-y: auto; */
 }
 
 #preview-mode {
@@ -304,10 +341,17 @@ input:focus {
 
 /* Progress bar */
 
+#progress-bar {
+  width: 180px;
+}
+
+#progress-render {
+  width: 100%;
+}
+
 progress {
   background-color: #b3b3b3;
   border: 0;
-  width: 180px;
   height: 18px;
   border-radius: 9px;
   margin-right: 10px;
@@ -320,42 +364,17 @@ progress::-webkit-progress-bar {
 
 progress::-webkit-progress-value {
   background: rgb(255, 99, 71);
-  /* background: -moz-linear-gradient(
-    90deg,
-    rgba(255, 99, 71, 1) 0%,
-    rgba(12, 250, 131, 1) 100%
-  );
-  background: -webkit-linear-gradient(
-    90deg,
-    rgba(255, 99, 71, 1) 0%,
-    rgba(12, 250, 131, 1) 100%
-  );
-  background: linear-gradient(
-    90deg,
-    rgba(255, 99, 71, 1) 0%,
-    rgba(12, 250, 131, 1) 100%
-  );
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ff6347",endColorstr="#0cfa83",GradientType=1); */
   border-radius: 9px;
 }
 
 progress::-moz-progress-bar {
   background: rgb(255, 99, 71);
-  /* background: -moz-linear-gradient(
-    90deg,
-    rgba(255, 99, 71, 1) 0%,
-    rgba(12, 250, 131, 1) 100%
-  );
-  background: -webkit-linear-gradient(
-    90deg,
-    rgba(255, 99, 71, 1) 0%,
-    rgba(12, 250, 131, 1) 100%
-  );
-  background: linear-gradient(
-    90deg,
-    rgba(255, 99, 71, 1) 0%,
-    rgba(12, 250, 131, 1) 100%
-  );
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ff6347",endColorstr="#0cfa83",GradientType=1); */
   border-radius: 9px;
+}
+
+/* Export */
+
+.export-option {
+  margin-top: 12px;
+  margin-bottom: 12px;
 }

@@ -4,7 +4,6 @@ let imagePattern = new RegExp("image/(png|jpeg|webp|bmp)");
 
 let allBlob = [];
 let imageId = 0;
-// let loadingAnimation;
 
 let ua = navigator.userAgent.toLowerCase();
 let checkBrowser = function (r) {
@@ -82,12 +81,12 @@ function roundBytes(bytes) {
 //   $(".zoom-selector").remove();
 // }
 
-function initializeProgress() {
-  $("#progress-bar").val(0);
+function initializeProgress(progress) {
+  progress.val(0);
 }
 
-function progressDone() {
-  $("#progress-bar").val(100);
+function progressDone(progress) {
+  progress.val(100);
 }
 
 function renderImage(canvas, type, ratio, loading) {
@@ -98,14 +97,35 @@ function renderImage(canvas, type, ratio, loading) {
 
       clearInterval(loading);
 
-      progressDone();
+      progressDone($("#progress-bar"));
     },
-    "image/" + "png",
+    type,
     ratio
   );
 }
 
-function setFilter(ctx, type, value) {}
+function setFilter(ctx, type, value) {
+  let filter = ctx.filter;
+  if (filter == "none") {
+    filter =
+      "contrast(100%) brightness(100%) blur(0px) opacity(100%) saturate(100%)";
+  }
+
+  if (type == "blur") {
+    value += "px";
+  } else {
+    value += "%";
+  }
+
+  let pattern = new RegExp(`${type}\\(\\d+(%|px)\\)`);
+
+  ctx.filter = filter.replace(pattern, `${type}(${value})`);
+}
+
+function getOutputName(inputName, inputType, destType) {
+  let pattern = new RegExp(inputType + "$");
+  return inputName.replace(pattern, destType);
+}
 
 function checkMIME(image) {
   let inputSize = image.size;
@@ -142,6 +162,7 @@ function checkMIME(image) {
 function handleFiles(image) {
   $("#panel-upload").addClass("disable");
   let inputName = image.name;
+  let inputSize = roundBytes(image.size);
 
   $("#navbar")
     .append(`<div class="image-tag image-selected flex f-spacebetween f-vcenter hp-100" data-image='${imageId}'>
@@ -191,18 +212,18 @@ function handleFiles(image) {
 
     let scale = imgWidth / imgHeight;
 
-    // $("#width").val(imgWidth);
-    // $("#height").val(imgHeight);
-
     let canvas = document.createElement("canvas");
     canvas.width = imgWidth;
     canvas.height = imgHeight;
     let ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
 
-    let ratio = 1;
+    $("#download").attr("download", inputName);
+    $("#download").attr("href", imageBlob);
+
     var timeOutID = undefined;
 
+    // Contrast
     $("#contrast").on("input", function () {
       let value = $(this).val();
       $("#contrast-value").val(value);
@@ -212,10 +233,10 @@ function handleFiles(image) {
       }
 
       timeOutID = window.setTimeout(function () {
-        ctx.filter = `contrast(${value}%)`;
+        setFilter(ctx, "contrast", value);
         ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
 
-        initializeProgress();
+        initializeProgress($("#progress-bar"));
         let progressValue = 0;
 
         let loadingAnimation = setInterval(function () {
@@ -227,7 +248,7 @@ function handleFiles(image) {
           }
         }, 40);
 
-        renderImage(canvas, startMime, ratio, loadingAnimation);
+        renderImage(canvas, startMime, 1, loadingAnimation);
       }, 200);
     });
 
@@ -235,15 +256,15 @@ function handleFiles(image) {
       let value = $(this).val();
       $("#contrast").val(value);
 
-      ctx.filter = `contrast(${value}%)`;
-      ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
-
       if (typeof timeOutID === "number") {
         window.clearTimeout(timeOutID);
       }
 
       timeOutID = window.setTimeout(function () {
-        initializeProgress();
+        setFilter(ctx, "contrast", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
         let progressValue = 0;
 
         let loadingAnimation = setInterval(function () {
@@ -255,23 +276,24 @@ function handleFiles(image) {
           }
         }, 40);
 
-        renderImage(canvas, startMime, ratio, loadingAnimation);
+        renderImage(canvas, startMime, 1, loadingAnimation);
       }, 200);
     });
 
+    // Brightness
     $("#brightness").on("input", function () {
       let value = $(this).val();
       $("#brightness-value").val(value);
 
-      ctx.filter = `brightness(${value}%)`;
-      ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
-
       if (typeof timeOutID === "number") {
         window.clearTimeout(timeOutID);
       }
 
       timeOutID = window.setTimeout(function () {
-        initializeProgress();
+        setFilter(ctx, "brightness", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
         let progressValue = 0;
 
         let loadingAnimation = setInterval(function () {
@@ -283,7 +305,7 @@ function handleFiles(image) {
           }
         }, 40);
 
-        renderImage(canvas, startMime, ratio, loadingAnimation);
+        renderImage(canvas, startMime, 1, loadingAnimation);
       }, 200);
     });
 
@@ -291,15 +313,15 @@ function handleFiles(image) {
       let value = $(this).val();
       $("#brightness").val(value);
 
-      ctx.filter = `brightness(${value}%)`;
-      ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
-
       if (typeof timeOutID === "number") {
         window.clearTimeout(timeOutID);
       }
 
       timeOutID = window.setTimeout(function () {
-        initializeProgress();
+        setFilter(ctx, "brightness", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
         let progressValue = 0;
 
         let loadingAnimation = setInterval(function () {
@@ -311,8 +333,260 @@ function handleFiles(image) {
           }
         }, 40);
 
-        renderImage(canvas, startMime, ratio, loadingAnimation);
+        renderImage(canvas, startMime, 1, loadingAnimation);
       }, 200);
+    });
+
+    // Blur
+    $("#blur").on("input", function () {
+      let value = $(this).val();
+      $("#blur-value").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "blur", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    $("#blur-value").on("change", function () {
+      let value = $(this).val();
+      $("#blur").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "blur", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    // Opacity
+    $("#opacity").on("input", function () {
+      let value = $(this).val();
+      $("#opacity-value").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "opacity", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    $("#opacity-value").on("change", function () {
+      let value = $(this).val();
+      $("#opacity").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "opacity", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    // Saturate
+    $("#saturate").on("input", function () {
+      let value = $(this).val();
+      $("#saturate-value").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "saturate", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    $("#saturate-value").on("change", function () {
+      let value = $(this).val();
+      $("#saturate").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "saturate", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    $("#export").on("click", function () {
+      if (startType == "png" || startType == "bmp") {
+        if (!$("#image-quality").prop("disabled")) {
+          $("#image-quality").val(10);
+          $("#image-quality").attr("disabled", "disabled");
+        }
+      } else {
+        if ($("#image-quality").prop("disabled")) {
+          $("#image-quality").prop("disabled", false);
+        }
+      }
+
+      $("#width").val(imgWidth);
+      $("#height").val(imgHeight);
+      $("#output-size").text(inputSize);
+      $("#image-type").val(startType);
+      $("#output-name").text(inputName);
+      $("#download").prop("disabled", false);
+
+      let destType = $("#image-type").val();
+      let downloadImageName = getOutputName(inputName, startType, destType);
+
+      $("#image-type").on("change", function () {
+        destType = $("#image-type option:selected").val();
+        downloadImageName = getOutputName(inputName, startType, destType);
+        $("#output-name").text(downloadImageName);
+
+        if (destType == "png" || destType == "bmp") {
+          if (!$("#image-quality").prop("disabled")) {
+            $("#image-quality").val(10);
+            $("#image-quality").attr("disabled", "disabled");
+          }
+        } else {
+          if ($("#image-quality").prop("disabled")) {
+            $("#image-quality").prop("disabled", false);
+          }
+        }
+      });
+
+      $("[data-custom-close=modal-export]").on("click", function () {
+        $("#download").prop("disabled", true);
+      });
+
+      $("#render").on("click", function () {
+        let ratio = parseInt($("#image-quality").val()) / 10;
+        if (destType == "jpg") destType = "jpeg";
+        $("#output-size").text("0B");
+
+        initializeProgress($("#progress-render"));
+
+        let renderValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          renderValue++;
+          $("#progress-render").val(renderValue);
+
+          if (renderValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        canvas.toBlob(
+          function (blob) {
+            let outputSize = roundBytes(blob.size);
+            $("#output-size").text(outputSize);
+
+            let newImageBlob = URL.createObjectURL(blob);
+            $(".download-image").attr("src", newImageBlob);
+
+            $("#download").attr("download", downloadImageName);
+            $("#download").attr("href", newImageBlob);
+
+            clearInterval(loadingAnimation);
+            progressDone($("#progress-render"));
+          },
+          "image/" + destType,
+          ratio
+        );
+      });
     });
   };
 
@@ -496,14 +770,17 @@ slider.addEventListener("mousedown", (e) => {
   startY = e.pageY - slider.offsetTop;
   scrollTop = slider.scrollTop;
 });
+
 slider.addEventListener("mouseleave", () => {
   isDown = false;
   slider.classList.remove("drag-active");
 });
+
 slider.addEventListener("mouseup", () => {
   isDown = false;
   slider.classList.remove("drag-active");
 });
+
 slider.addEventListener("mousemove", (e) => {
   if (!isDown) return;
   e.preventDefault();

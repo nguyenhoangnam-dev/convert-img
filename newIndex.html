@@ -4,17 +4,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./lib/micromodal.css">
   <link rel="stylesheet" href="./css/newMain.css">
   <title>Process image</title>
 </head>
 
 <body class="flex f-column f-spacebetween">
+  <!-- Export modal -->
+  <div class="modal micromodal-slide" id="modal-export" aria-hidden="true">
+    <div class="modal__overlay" tabindex="-1" data-custom-close="modal-export">
+      <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-export-title">
+        <header class="modal__header">
+          <h2 class="modal__title" id="modal-export-title">
+            Export
+          </h2>
+          <button class="modal__close" aria-label="Close modal" data-custom-close="modal-export"></button>
+        </header>
+        <div class="modal__content">
+          <div class="flex f-left f-vcenter export-option">
+            <p>File name:</p>
+            <div class="ml-10" id="output-name"></div>
+          </div>
+          <div class="flex f-left f-vcenter export-option">
+            <p>File size:</p>
+            <div class="ml-10" id="output-size"></div>
+          </div>
+          <div class="flex f-left f-vcenter export-option">
+            <p>File type: </p>
+            <select class="ml-10" id="image-type">
+              <option value="png" selected="selected">png</option>
+              <option value="jpg">jpg</option>
+              <option value="webp">webp</option>
+              <option value="bmp" disabled>bmp</option>
+            </select>
+          </div>
+          <div class="flex f-left f-vcenter export-option">
+            <p>Dimension: </p>
+            <input class="i-4 ml-10" type="text" name="width" id="width">
+            <img class="time-operator icon-s ml-5 mr-5" src="./img/time.svg" alt="right arrow">
+            <input class="i-4" type="text" name="height" id="height">
+          </div>
+          <div class="flex f-left f-vcenter export-option">
+            <p>Quality: </p>
+            <select class="ml-10" id="image-quality" disabled="disabled">
+              <option value="10" selected="selected">10</option>
+              <option value="9">9</option>
+              <option value="8">8</option>
+              <option value="7">7</option>
+              <option value="6">6</option>
+              <option value="5">5</option>
+              <option value="4">4</option>
+              <option value="3">3</option>
+              <option value="2">2</option>
+              <option value="1">1</option>
+            </select>
+          </div>
+          <div>
+            <a href="" id="download" disabled="disabled">download</a>
+          </div>
+          <div>
+            <progress class="w-100 export-option" id="progress-render" max="100" value="0"></progress>
+          </div>
+        </div>
+
+        <button type="button" id="render" class="modal__btn">Render</button>
+        <button type="button" class="modal__btn" data-custom-close="modal-export" aria-label="Close this dialog window">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div class="panel-upload flex f-center f-vcenter" id="panel-upload">
     <div class="m-upload flex f-center f-vcenter" id="upload-box">
       <input type="file" id="upload" class="disable">
       <img id="icon-upload" src="./img/server.svg" alt="upload">
     </div>
   </div>
+
   <main class="flex">
     <section class="w-80">
       <header class="flex f-spacebetween f-vcenter header">
@@ -40,7 +105,7 @@
           <img class="magnify upload-image output-image review-image disable" data-review-image='0'>
         </div>
       </div>
-      <div id="compare-mode" class="w-100 h-100">
+      <div id="compare-mode" class="w-100">
 
       </div>
     </section>
@@ -69,7 +134,7 @@
           <input type="range" id="blur" class="slider" min="0" max="100" value="0">
         </div>
         <div class="tool-value flex f-vcenter">
-          <input type="text" class="i-val" value="0" id="blur-value"> %
+          <input type="text" class="i-val" value="0" id="blur-value"> px
         </div>
       </div>
       <div class="tool flex">
@@ -91,7 +156,7 @@
         </div>
       </div>
       <div class="mt-20">
-        <button class="btn-border btn-hover" id="export">
+        <button class="btn-border btn-hover" id="export" data-custom-open="modal-export">
           Export
         </button>
         <button class="btn-border btn-hover" id="reset">
@@ -104,6 +169,20 @@
     <progress class="ml-10" id="progress-bar" max="100" value="0"></progress>
   </footer>
   <script src="./lib/jquery.min.js"></script>
+  <script src="./lib/micromodal.min.js"></script>
+  <script>
+    MicroModal.init({
+      onShow: modal => console.info(`${modal.id} is shown`),
+      onClose: modal => console.info(`${modal.id} is hidden`),
+      openTrigger: 'data-custom-open',
+      closeTrigger: 'data-custom-close',
+      disableScroll: true,
+      disableFocus: false,
+      awaitOpenAnimation: false,
+      awaitCloseAnimation: false,
+      debugMode: true
+    });
+  </script>
   <script src="./js/newIndex.js"></script>
 </body>
 
