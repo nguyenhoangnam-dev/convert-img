@@ -4,26 +4,319 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Process image</title>
+  <link rel="stylesheet" href="./lib/micromodal.css">
+  <link rel="stylesheet" href="./css/newMain.css">
+  <title>2 Process image</title>
 </head>
 
-<body>
-  <header class="flex f-left f-vcenter">
-    <div id="logo">
+<body class="flex f-column f-spacebetween">
 
-    </div>
-    <div class="image-tag">
-      <div class="image-name"></div>
-    </div>
-  </header>
-  <main>
-    <section>
 
+  <!-- Export modal -->
+  <div class="modal micromodal-slide" id="modal-export" aria-hidden="true">
+    <div class="modal__overlay" tabindex="-1" data-custom-close="modal-export">
+      <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-export-title">
+        <header class="modal__header">
+          <h2 class="modal__title" id="modal-export-title">
+            Export
+          </h2>
+          <button class="modal__close" aria-label="Close modal" data-custom-close="modal-export"></button>
+        </header>
+
+
+        <!-- Export setting -->
+        <div class="modal__content">
+          <div class="flex f-left f-vcenter export-option">
+            <p>File name:</p>
+            <div class="ml-10">
+              <span id="hide"></span><input type="text" id="output-name">.<span id="name-type"></span>
+            </div>
+          </div>
+          <div class="flex f-left f-vcenter export-option">
+            <p>File size:</p>
+            <div class="ml-10" id="output-size"></div>
+          </div>
+          <div class="flex f-left f-vcenter export-option">
+            <p>File type: </p>
+            <select class="ml-10" id="image-type">
+              <option value="png" selected="selected">png</option>
+              <option value="jpg">jpg</option>
+              <option value="webp">webp</option>
+              <option value="bmp" disabled>bmp</option>
+            </select>
+          </div>
+          <div class="flex f-left f-vcenter export-option">
+            <p>File unit: </p>
+            <select class="ml-10" id="image-unit">
+              <option value="px" selected="selected">pixel</option>
+              <option value="in">inch</option>
+              <option value="cm">cm</option>
+              <option value="mm">mm</option>
+            </select>
+          </div>
+          <div class="flex f-left f-vcenter export-option">
+            <p>Dimension: </p>
+            <input class="i-4 ml-10" type="text" name="width" id="width">
+            <img class="time-operator icon-s ml-5 mr-5" src="./img/time.svg" alt="right arrow">
+            <input class="i-4" type="text" name="height" id="height">
+          </div>
+          <div class="flex f-left f-vcenter export-option" id="quality-option">
+            <p>Quality: </p>
+            <div class="tool-slider slidecontainer ml-10">
+              <input type="range" id="quality" class="slider" min="0" max="100" value="100">
+            </div>
+            <div class="tool-value flex f-vcenter ml-10">
+              <input type="text" class="i-val" value="100" id="quality-value"> %
+            </div>
+            <div class="pop-up pop-up-bottom">
+              <p>Can not set quality of png because of lossless type.</p>
+            </div>
+          </div>
+          <div id="export-mode" class="w-100 flex f-center">
+            <img class="upload-image review-image output-image" data-review-image='0' id="output-image">
+          </div>
+          <div>
+            <progress class="w-100 export-option" id="progress-render" max="100" value="0"></progress>
+          </div>
+        </div>
+
+        <div class="flex f-spacebetween f-vcenter">
+          <div class="flex f-left">
+            <button type="button" id="render" class="modal__btn mr-10">Render</button>
+            <button type="button" class="modal__btn" data-custom-close="modal-export" aria-label="Close this dialog window">Cancel</button>
+          </div>
+          <div class="flex f-right">
+            <a href="" id="download" disabled="disabled">download</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Upload panel -->
+  <div class="panel-upload flex f-center f-vcenter" id="panel-upload">
+    <div class="m-upload flex f-center f-vcenter" id="upload-box">
+      <input type="file" id="upload" class="disable">
+
+      <svg id="icon-upload" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13.5 23h-3c-.552 0-1-.449-1-1v-5H7a.5.5 0 01-.354-.854l5-5a.5.5 0 01.707 0l5 5A.499.499 0 0117 17h-2.5v5c0 .551-.448 1-1 1zm-5.293-7H10a.5.5 0 01.5.5V22h3v-5.5a.5.5 0 01.5-.5h1.793L12 12.207z" />
+        <path d="M4.501 16.97a.559.559 0 01-.057-.003A4.992 4.992 0 010 12a5.006 5.006 0 014.656-4.988C5.348 3.556 8.433 1 12 1a7.508 7.508 0 016.653 4.044A5.985 5.985 0 0124 11c0 2.68-1.796 5.05-4.366 5.762a.5.5 0 11-.267-.964C21.506 15.206 23 13.232 23 11a4.983 4.983 0 00-4.697-4.981.5.5 0 01-.426-.288A6.503 6.503 0 0012 2C8.785 2 6.023 4.395 5.575 7.57A.5.5 0 015.08 8C2.794 8 1 9.794 1 12a3.992 3.992 0 003.556 3.973.5.5 0 01-.055.997z" /></svg>
+
+      <p class='t-grey f-15' id="describe-upload">Click, or drop file here to upload</p>
+    </div>
+  </div>
+
+
+  <!-- Main view of studio -->
+  <main class="flex">
+
+
+    <!-- Preview of image -->
+    <section class="w-80">
+      <header class="flex f-spacebetween f-vcenter header">
+        <div class="flex f-left f-vcenter hp-100 " id="navbar">
+          <div id="logo">
+            <img class="icon-l" src="./img/process.svg" alt="logo">
+          </div>
+        </div>
+        <div class="flex f-right f-vcenter tool-box hp-100 ">
+
+
+          <!-- Magnify tool to zoom in specific area of image -->
+          <button class="tool-item flex f-center f-vcenter hp-100" id="zoom-in">
+            <img class="icon-m" src="./img/search.svg" alt="zoom in">
+          </button>
+
+
+          <!-- Upload new image -->
+          <button class="tool-item flex f-center f-vcenter hp-100" id="upload-new">
+            <img class="icon-m" src="./img/server.svg" alt="upload new file">
+          </button>
+
+
+          <!-- Change between preview mode and compare mode -->
+          <button class="tool-item flex f-center f-vcenter hp-100" id="change-view">
+            <img class="icon-m" src="./img/compare.svg" alt="change view mode">
+          </button>
+        </div>
+      </header>
+      <div id="preview-mode" class="w-100">
+        <div class="review-box zoom-box">
+          <img class="magnify upload-image output-image review-image disable" id="preview-image" data-review-image='0'>
+        </div>
+      </div>
+      <div id="compare-mode" class="w-100">
+
+      </div>
     </section>
-    <section>
 
+    <!-- Filter sidebar -->
+    <section class="w-20 side-bar flex f-column f-vcenter">
+
+
+      <!-- Contrast -->
+      <div class="tool flex f-vcenter">
+        <div class="tool-name">Contrast: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="contrast" class="slider" min="0" max="100" value="100">
+        </div>
+        <div class="tool-value flex f-vcenter ml-10">
+          <input type="text" class="i-val" value="100" id="contrast-value"> %
+        </div>
+        <div class="pop-up pop-up-left">
+          <p>Difference in luminance or colour that makes an object (or its representation in an image or display) distinguishable.</p>
+        </div>
+      </div>
+
+
+      <!-- Brightness -->
+      <div class="tool flex f-vcenter">
+        <div class="tool-name">Brightness: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="brightness" class="slider" min="0" max="100" value="100">
+        </div>
+        <div class="tool-value flex f-vcenter ml-10">
+          <input type="text" class="i-val" value="100" id="brightness-value"> %
+        </div>
+        <div class="pop-up pop-up-left">
+          <p>An attribute of visual perception in which a source appears to be radiating or reflecting light.</p>
+        </div>
+      </div>
+
+
+      <!-- Opacity -->
+      <div class="tool flex f-vcenter">
+        <div class="tool-name">Opacity: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="opacity" class="slider" min="0" max="100" value="100">
+        </div>
+        <div class="tool-value flex f-vcenter ml-10">
+          <input type="text" class="i-val" value="100" id="opacity-value"> %
+        </div>
+        <div class="pop-up pop-up-left">
+          <p>Describes the transparency level, it ranges from 0 to 1.</p>
+        </div>
+      </div>
+
+
+      <!-- Saturate -->
+      <div class="tool flex f-vcenter">
+        <div class="tool-name">Saturate: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="saturate" class="slider" min="0" max="100" value="100">
+        </div>
+        <div class="tool-value flex f-vcenter ml-10">
+          <input type="text" class="i-val" value="100" id="saturate-value"> %
+        </div>
+        <div class="pop-up pop-up-left">
+          <p>Describes the depth or intensity of color present within an image.</p>
+        </div>
+      </div>
+
+
+      <!-- Grayscale -->
+      <div class="tool flex f-vcenter">
+        <div class="tool-name">Grayscale: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="grayscale" class="slider" min="0" max="100" value="0">
+        </div>
+        <div class="tool-value flex f-vcenter ml-10">
+          <input type="text" class="i-val" value="0" id="grayscale-value"> %
+        </div>
+        <div class="pop-up pop-up-left">
+          <p>The value of each pixel is a single sample representing only an amount of light.</p>
+        </div>
+      </div>
+
+
+      <!-- Invert -->
+      <div class="tool flex f-vcenter">
+        <div class="tool-name">Invert: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="invert" class="slider" min="0" max="100" value="0">
+        </div>
+        <div class="tool-value flex f-vcenter ml-10">
+          <input type="text" class="i-val" value="0" id="invert-value"> %
+        </div>
+        <div class="pop-up pop-up-left">
+          <p>Change all pixel color to the opposite.</p>
+        </div>
+      </div>
+
+
+      <!-- Sepia -->
+      <div class="tool flex f-vcenter">
+        <div class="tool-name">Sepia: </div>
+        <div class="tool-slider slidecontainer">
+          <input type="range" id="sepia" class="slider" min="0" max="100" value="0">
+        </div>
+        <div class="tool-value flex f-vcenter ml-10">
+          <input type="text" class="i-val" value="0" id="sepia-value"> %
+        </div>
+        <div class="pop-up pop-up-left">
+          <p>A form of photographic print toning – a tone added to a black and white photograph in the darkroom to “warm” up the tones.</p>
+        </div>
+      </div>
+
+
+      <!-- Blur -->
+      <div class="tool flex f-vcenter">
+        <div class="tool-name">Blur: </div>
+        <div class="tool-value flex f-vcenter">
+          <input type="text" class="i-val" value="0" id="blur-value"> px
+        </div>
+        <div class="pop-up pop-up-left">
+          <p>Blur image.</p>
+        </div>
+      </div>
+
+
+      <!-- Export and rest button -->
+      <div class="mt-20">
+        <button class="btn-border btn-hover" id="export" data-custom-open="modal-export">
+          Export
+        </button>
+        <button class="btn-border btn-hover" id="reset">
+          Reset
+        </button>
+      </div>
     </section>
   </main>
+
+
+  <!-- Footer -->
+  <footer class="flex f-left f-vcenter">
+
+
+    <!-- Progress bar of filter -->
+    <progress class="ml-10" id="progress-bar" max="100" value="0"></progress>
+
+
+    <!-- Information of image -->
+    <div class="t-grey ml-10" id="file-size"></div>
+    <div class="t-grey ml-10" id="file-type"></div>
+    <div class="t-grey ml-10" id="file-dimension"></div>
+    <div class="t-grey ml-10" id="file-unit">px</div>
+  </footer>
+
+
+  <!-- Script -->
+  <script src="./lib/jquery.min.js"></script>
+  <script src="./lib/micromodal.min.js"></script>
+  <script>
+    MicroModal.init({
+      openTrigger: 'data-custom-open',
+      closeTrigger: 'data-custom-close',
+      disableScroll: true,
+      disableFocus: false,
+      awaitOpenAnimation: false,
+      awaitCloseAnimation: false,
+      debugMode: true
+    });
+  </script>
+  <script src="./js/newIndex.js"></script>
 </body>
 
 </html>
