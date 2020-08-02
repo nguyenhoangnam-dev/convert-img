@@ -4,7 +4,7 @@ _This is tool to convert, compress image using only **jQuery** without server si
 
 ## Usage
 
-![Preview mode]('./img/demo-usage.jpg')
+![Preview mode](./img/demo-usage.jpg)
 This is preview mode
 
 ## Contributing
