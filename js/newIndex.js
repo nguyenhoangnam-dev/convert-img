@@ -1,9 +1,15 @@
 let uploadBox = document.getElementById("upload-box");
 
-let imagePattern = new RegExp("image/(png|jpeg|webp|bmp)");
+let imagePattern = new RegExp("image/(png|jpeg|webp|bmp|svg\\+xml)");
+let htmlCommentRegex = /<!--([\s\S]*?)-->/g;
+let svgPattern = /^\s*(?:<\?xml[^>]*>\s*)?(?:<!doctype svg[^>]*\s*(?:\[?(?:\s*<![^>]*>\s*)*\]?)*[^>]*>\s*)?(?:<svg[^>]*>[^]*<\/svg>|<svg[^/>]*\/\s*>)\s*$/i;
 
 let allBlob = [];
 let imageId = 0;
+let preFilter =
+  "contrast(100%) brightness(100%) blur(0px) opacity(100%) saturate(100%) grayscale(0%) invert(0%) sepia(0%)";
+let outputWidth;
+let outputHeight;
 
 let ua = navigator.userAgent.toLowerCase();
 let checkBrowser = function (r) {
@@ -59,7 +65,23 @@ let MIME = {
     pattern: [0x42, 0x4d],
     mask: [0xff, 0xff],
   },
+  "image/svg+xml": {
+    ext: "svg",
+  },
 };
+
+function cleanEntities(svg) {
+  const entityRegex = /\s*<!Entity\s+\S*\s*(?:"|')[^"]+(?:"|')\s*>/gim;
+  // Remove entities
+  return svg.replace(entityRegex, "");
+}
+
+function checkSVG(svg) {
+  return (
+    Boolean(svg) &&
+    svgPattern.test(cleanEntities(svg.toString()).replace(htmlCommentRegex, ""))
+  );
+}
 
 function check(bytes, mime) {
   for (var i = 0, l = mime.mask.length; i < l; ++i) {
@@ -90,25 +112,25 @@ function progressDone(progress) {
 }
 
 function renderImage(canvas, type, ratio, loading) {
-  canvas.toBlob(
-    function (blob) {
-      let newImageBlob = URL.createObjectURL(blob);
-      $(".output-image").attr("src", newImageBlob);
+  canvas.toBlob(function (blob) {
+    let outputSize = roundBytes(blob.size);
+    $("#file-size").text(outputSize);
+    $("#output-size").text(outputSize);
 
-      clearInterval(loading);
+    let newImageBlob = URL.createObjectURL(blob);
+    $(".output-image").attr("src", newImageBlob);
 
-      progressDone($("#progress-bar"));
-    },
-    type,
-    ratio
-  );
+    clearInterval(loading);
+
+    progressDone($("#progress-bar"));
+  }, type);
 }
 
 function setFilter(ctx, type, value) {
   let filter = ctx.filter;
   if (filter == "none") {
     filter =
-      "contrast(100%) brightness(100%) blur(0px) opacity(100%) saturate(100%)";
+      "contrast(100%) brightness(100%) blur(0px) opacity(100%) saturate(100%) grayscale(0%) invert(0%) sepia(0%)";
   }
 
   if (type == "blur") {
@@ -118,8 +140,26 @@ function setFilter(ctx, type, value) {
   }
 
   let pattern = new RegExp(`${type}\\(\\d+(%|px)\\)`);
+  preFilter = filter.replace(pattern, `${type}(${value})`);
 
-  ctx.filter = filter.replace(pattern, `${type}(${value})`);
+  ctx.filter = preFilter;
+}
+
+function setOutputName(outputName) {
+  let outputNameSplit = outputName.split(".");
+  let type = outputNameSplit.pop();
+
+  // jpg, jpeg, jpe have the same MIME
+  if (type == "jpeg" || type == "jpe") type = "jpg";
+  if (type == "svg") type = "png";
+  let name = outputNameSplit.join(".");
+
+  $("#output-name").val(name);
+  $("#hide").text(name);
+  $("#output-name").width($("#hide").width());
+  $("#name-type").text(type);
+
+  return name;
 }
 
 function getOutputName(inputName, inputType, destType) {
@@ -130,22 +170,17 @@ function getOutputName(inputName, inputType, destType) {
 function checkMIME(image) {
   let inputSize = image.size;
   let inputType = image.type;
-  let fileBlob = image.slice(0, 4);
-
-  // $("#input-name").text(inputName);
-  // $("#input-size").text(roundBytes(inputSize));
 
   // Check mime type
   if (!imagePattern.test(inputType)) {
     alert("Invalid image type.");
   } else {
-    let reader = new FileReader();
-    reader.readAsArrayBuffer(fileBlob);
+    if (inputType == "image/svg+xml") {
+      let reader = new FileReader();
 
-    reader.onloadend = function (e) {
-      if (!e.target.error) {
-        let bytes = new Uint8Array(e.target.result);
-        if (check(bytes, MIME[inputType])) {
+      reader.onload = function (event) {
+        let svgContent = event.target.result;
+        if (checkSVG(svgContent)) {
           if (inputSize > 52428800) {
             alert("File should be <= 50MB.");
           } else {
@@ -154,8 +189,29 @@ function checkMIME(image) {
         } else {
           alert("Can not read file.");
         }
-      }
-    };
+      };
+
+      reader.readAsText(image);
+    } else {
+      let fileBlob = image.slice(0, 4);
+      let reader = new FileReader();
+      reader.readAsArrayBuffer(fileBlob);
+
+      reader.onloadend = function (e) {
+        if (!e.target.error) {
+          let bytes = new Uint8Array(e.target.result);
+          if (check(bytes, MIME[inputType])) {
+            if (inputSize > 52428800) {
+              alert("File should be <= 50MB.");
+            } else {
+              handleFiles(image);
+            }
+          } else {
+            alert("Can not read file.");
+          }
+        }
+      };
+    }
   }
 }
 
@@ -163,10 +219,15 @@ function handleFiles(image) {
   $("#panel-upload").addClass("disable");
   let inputName = image.name;
   let inputSize = roundBytes(image.size);
+  let startMime = image.type;
+  let startType = MIME[startMime].ext;
 
   $("#navbar")
-    .append(`<div class="image-tag image-selected flex f-spacebetween f-vcenter hp-100" data-image='${imageId}'>
+    .append(`<div class="image-tag image-selected flex f-spacebetween f-vcenter hp-100">
             <div class="image-name">${inputName}</div>
+            <div class="pop-up pop-up-bottom">
+              <p>${inputName}</p>
+            </div>
             <button class="btn-exist">
               <img class="icon-s" src="./img/time.svg" alt="exist">
             </button>
@@ -199,24 +260,26 @@ function handleFiles(image) {
     let imgHeight = event.target.height;
 
     if (imgWidth >= imgHeight) {
-      $(".upload-image").addClass("w-100");
+      $("#preview-image").addClass("w-100");
+      $("#output-image").addClass("mw-export");
     } else {
+      $("#output-image").addClass("mh-export");
       $(".review-box").addClass("hp-100");
-      $(".upload-image").addClass("hp-100");
+      $("#preview-image").addClass("hp-100");
     }
 
     $(".upload-image").removeClass("disable");
-
-    let startType = MIME[image.type].ext;
-    let startMime = image.type;
-
-    let scale = imgWidth / imgHeight;
+    $("#file-size").text(inputSize);
+    $("#file-type").text(startType);
+    $("#file-dimension").text(`${imgWidth} x ${imgHeight}`);
 
     let canvas = document.createElement("canvas");
     canvas.width = imgWidth;
     canvas.height = imgHeight;
     let ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+    $("#output-size").text(inputSize);
 
     $("#download").attr("download", inputName);
     $("#download").attr("href", imageBlob);
@@ -338,37 +401,8 @@ function handleFiles(image) {
     });
 
     // Blur
-    $("#blur").on("input", function () {
-      let value = $(this).val();
-      $("#blur-value").val(value);
-
-      if (typeof timeOutID === "number") {
-        window.clearTimeout(timeOutID);
-      }
-
-      timeOutID = window.setTimeout(function () {
-        setFilter(ctx, "blur", value);
-        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
-
-        initializeProgress($("#progress-bar"));
-        let progressValue = 0;
-
-        let loadingAnimation = setInterval(function () {
-          progressValue++;
-          $("#progress-bar").val(progressValue);
-
-          if (progressValue == 90) {
-            clearInterval(loadingAnimation);
-          }
-        }, 40);
-
-        renderImage(canvas, startMime, 1, loadingAnimation);
-      }, 200);
-    });
-
     $("#blur-value").on("change", function () {
       let value = $(this).val();
-      $("#blur").val(value);
 
       if (typeof timeOutID === "number") {
         window.clearTimeout(timeOutID);
@@ -508,52 +542,394 @@ function handleFiles(image) {
       }, 200);
     });
 
+    $("#grayscale").on("input", function () {
+      let value = $(this).val();
+      $("#grayscale-value").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "grayscale", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    $("#grayscale-value").on("change", function () {
+      console.log("change");
+      let value = $(this).val();
+      $("#grayscale").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "grayscale", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    $("#invert").on("input", function () {
+      let value = $(this).val();
+      $("#invert-value").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "invert", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    $("#invert-value").on("change", function () {
+      let value = $(this).val();
+      $("#invert").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "invert", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    $("#sepia").on("input", function () {
+      let value = $(this).val();
+      $("#sepia-value").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "sepia", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    $("#sepia-value").on("change", function () {
+      let value = $(this).val();
+      $("#sepia").val(value);
+
+      if (typeof timeOutID === "number") {
+        window.clearTimeout(timeOutID);
+      }
+
+      timeOutID = window.setTimeout(function () {
+        setFilter(ctx, "sepia", value);
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+        initializeProgress($("#progress-bar"));
+        let progressValue = 0;
+
+        let loadingAnimation = setInterval(function () {
+          progressValue++;
+          $("#progress-bar").val(progressValue);
+
+          if (progressValue == 90) {
+            clearInterval(loadingAnimation);
+          }
+        }, 40);
+
+        renderImage(canvas, startMime, 1, loadingAnimation);
+      }, 200);
+    });
+
+    $("#reset").on("click", function () {
+      $("#contrast").val(100);
+      $("#contrast-value").val(100);
+      $("#brightness").val(100);
+      $("#brightness-value").val(100);
+      $("#opacity").val(100);
+      $("#opacity-value").val(100);
+      $("#saturate").val(100);
+      $("#saturate-value").val(100);
+      $("#invert").val(0);
+      $("#invert-value").val(0);
+      $("#sepia").val(0);
+      $("#sepia-value").val(0);
+      $("#grayscale").val(0);
+      $("#grayscale-value").val(0);
+      $("#blur-value").val(0);
+
+      ctx.filter = "none";
+      ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+      initializeProgress($("#progress-bar"));
+      let progressValue = 0;
+
+      let loadingAnimation = setInterval(function () {
+        progressValue++;
+        $("#progress-bar").val(progressValue);
+
+        if (progressValue == 90) {
+          clearInterval(loadingAnimation);
+        }
+      }, 40);
+
+      renderImage(canvas, startMime, 1, loadingAnimation);
+    });
+
+    $("#quality").on("input", function () {
+      let qualityValue = $(this).val();
+      $("#quality-value").val(qualityValue);
+    });
+
+    $("#quality-value").on("change", function () {
+      let qualityValue = $(this).val();
+      $("#quality").val(qualityValue);
+    });
+
     $("#export").on("click", function () {
-      if (startType == "png" || startType == "bmp") {
+      let outputName = inputName;
+      let destType = startType;
+      if (startType == "svg") {
+        destType = "png";
+      }
+
+      outputWidth = imgWidth;
+      outputHeight = imgHeight;
+
+      $(function () {
+        $("#hide").text($("#output-name").val());
+        outputName = $("#output-name").val() + "." + destType;
+        $("#output-name").width($("#hide").width());
+      }).on("input", function () {
+        $("#hide").text($("#output-name").val());
+        outputName = $("#output-name").val() + "." + destType;
+        $("#output-name").width($("#hide").width());
+      });
+
+      if (destType == "png" || destType == "bmp") {
         if (!$("#image-quality").prop("disabled")) {
-          $("#image-quality").val(10);
-          $("#image-quality").attr("disabled", "disabled");
+          $("#quality").val(100);
+          $("#quality").prop("disabled", true);
+          $("#quality-value").val(100);
+          $("#quality-value").prop("disabled", true);
+          $("#quality-option").addClass("add-pop-up");
         }
       } else {
-        if ($("#image-quality").prop("disabled")) {
-          $("#image-quality").prop("disabled", false);
+        if ($("#quality").prop("disabled")) {
+          $("#quality").prop("disabled", false);
+          $("#quality-value").prop("disabled", false);
         }
+
+        if (destType == "jpg") {
+          $("#quality").val(92);
+          $("#quality-value").val(92);
+        } else if (destType == "webp") {
+          $("#quality").val(80);
+          $("#quality-value").val(80);
+        }
+        $("#quality-option").removeClass("add-pop-up");
       }
 
       $("#width").val(imgWidth);
       $("#height").val(imgHeight);
-      $("#output-size").text(inputSize);
-      $("#image-type").val(startType);
-      $("#output-name").text(inputName);
+
+      $("#image-type").val(destType);
+
       $("#download").prop("disabled", false);
+      outputName = setOutputName(outputName);
 
-      let destType = $("#image-type").val();
-      let downloadImageName = getOutputName(inputName, startType, destType);
-
+      let oldType = destType;
       $("#image-type").on("change", function () {
-        destType = $("#image-type option:selected").val();
-        downloadImageName = getOutputName(inputName, startType, destType);
-        $("#output-name").text(downloadImageName);
+        destType = $(this).val();
+
+        outputName = getOutputName(outputName, oldType, destType);
+        outputName = setOutputName(outputName);
+        oldType = destType;
 
         if (destType == "png" || destType == "bmp") {
           if (!$("#image-quality").prop("disabled")) {
-            $("#image-quality").val(10);
-            $("#image-quality").attr("disabled", "disabled");
+            $("#quality").val(100);
+            $("#quality").prop("disabled", true);
+            $("#quality-value").val(100);
+            $("#quality-value").prop("disabled", true);
+            $("#quality-option").addClass("add-pop-up");
           }
         } else {
-          if ($("#image-quality").prop("disabled")) {
-            $("#image-quality").prop("disabled", false);
+          if ($("#quality").prop("disabled")) {
+            $("#quality").prop("disabled", false);
+            $("#quality-value").prop("disabled", false);
           }
+
+          if (destType == "jpg") {
+            $("#quality").val(92);
+            $("#quality-value").val(92);
+          } else if (destType == "webp") {
+            $("#quality").val(80);
+            $("#quality-value").val(80);
+          }
+
+          $("#quality-option").removeClass("add-pop-up");
+        }
+      });
+
+      let scale = imgWidth / imgHeight;
+
+      $("#width").on("input", function () {
+        let newImgWidth = $(this).val();
+        let selectUnit = $("#image-unit").val();
+        let newImgHeight = Math.round(newImgWidth / scale);
+
+        if (selectUnit == "px") {
+          outputWidth = newImgWidth;
+          outputHeight = newImgHeight;
+        } else if (selectUnit == "in") {
+          outputWidth = newImgWidth * 96;
+          outputHeight = newImgHeight * 96;
+        } else if (selectUnit == "cm") {
+          outputWidth = Math.round((newImgWidth * 96) / 2.54);
+          outputHeight = Math.round((newImgHeight * 96) / 2.54);
+        } else if (selectUnit == "mm") {
+          outputWidth = Math.round((newImgWidth * 96) / 25.4);
+          outputHeight = Math.round((newImgHeight * 96) / 25.4);
+        }
+
+        $("#height").val(newImgHeight);
+
+        canvas.width = outputWidth;
+        canvas.height = outputHeight;
+        ctx.filter = preFilter;
+        ctx.drawImage(img, 0, 0, outputWidth, outputHeight);
+      });
+
+      $("#height").on("input", function () {
+        let newImgHeight = $(this).val();
+        let selectUnit = $("#image-unit").val();
+        let newImgWidth = Math.round(newImgHeight * scale);
+
+        if (selectUnit == "px") {
+          outputWidth = newImgWidth;
+          outputHeight = newImgHeight;
+        } else if (selectUnit == "in") {
+          outputWidth = newImgWidth * 96;
+          outputHeight = newImgHeight * 96;
+        } else if (selectUnit == "cm") {
+          outputWidth = Math.round((newImgWidth * 96) / 2.54);
+          outputHeight = Math.round((newImgHeight * 96) / 2.54);
+        } else if (selectUnit == "mm") {
+          outputWidth = Math.round((newImgWidth * 96) / 25.4);
+          outputHeight = Math.round((newImgHeight * 96) / 25.4);
+        }
+
+        $("#width").val(newImgWidth);
+
+        canvas.width = outputWidth;
+        canvas.height = outputHeight;
+        ctx.filter = preFilter;
+        ctx.drawImage(img, 0, 0, outputWidth, outputHeight);
+      });
+
+      $("#image-unit").on("change", function () {
+        let selectUnit = $(this).val();
+
+        if (selectUnit == "px") {
+          $("#width").val(outputWidth);
+          $("#height").val(outputHeight);
+        } else if (selectUnit == "in") {
+          $("#width").val(Math.round(outputWidth / 96));
+          $("#height").val(Math.round(outputHeight / 96));
+        } else if (selectUnit == "cm") {
+          $("#width").val(Math.round((outputWidth * 2.54) / 96));
+          $("#height").val(Math.round((outputHeight * 2.54) / 96));
+        } else if (selectUnit == "mm") {
+          $("#width").val(Math.round((outputWidth * 25.4) / 96));
+          $("#height").val(Math.round((outputHeight * 25.4) / 96));
         }
       });
 
       $("[data-custom-close=modal-export]").on("click", function () {
         $("#download").prop("disabled", true);
+
+        canvas.width = imgWidth;
+        canvas.height = imgHeight;
+        ctx.filter = preFilter;
+        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
       });
 
       $("#render").on("click", function () {
-        let ratio = parseInt($("#image-quality").val()) / 10;
-        if (destType == "jpg") destType = "jpeg";
+        let ratio = parseInt($("#quality-value").val()) / 100;
+
+        let destMimeType = destType;
+        if (destType == "jpg") destMimeType = "jpeg";
         $("#output-size").text("0B");
 
         initializeProgress($("#progress-render"));
@@ -576,118 +952,23 @@ function handleFiles(image) {
 
             let newImageBlob = URL.createObjectURL(blob);
             $(".download-image").attr("src", newImageBlob);
+            $("#output-image").attr("src", newImageBlob);
 
-            $("#download").attr("download", downloadImageName);
+            $("#download").attr("download", outputName);
             $("#download").attr("href", newImageBlob);
 
             clearInterval(loadingAnimation);
             progressDone($("#progress-render"));
           },
-          "image/" + destType,
+          "image/" + destMimeType,
           ratio
         );
       });
     });
   };
-
-  // img.onload = function (e) {
-  //   let startType = MIME[image.type].ext;
-
-  //   let imgWidth = e.target.width;
-  //   let imgHeight = e.target.height;
-  //   let scale = imgWidth / imgHeight;
-
-  //   $("#width").val(imgWidth);
-  //   $("#height").val(imgHeight);
-
-  //   let canvas = document.createElement("canvas");
-  //   canvas.width = imgWidth;
-  //   canvas.height = imgHeight;
-  //   let ctx = canvas.getContext("2d");
-  //   ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
-
-  //   $("#convert").addClass("btn-select");
-
-  //   $("#width").on("input", function () {
-  //     let newImgWidth = $(this).val();
-  //     let newImgHeight = newImgWidth / scale;
-
-  //     imgWidth = newImgWidth;
-  //     imgHeight = newImgHeight;
-
-  //     $("#height").val(newImgHeight);
-
-  //     canvas.width = newImgWidth;
-  //     canvas.height = newImgHeight;
-  //     ctx.drawImage(img, 0, 0, newImgWidth, newImgHeight);
-  //   });
-
-  //   $("#height").on("input", function () {
-  //     let newImgHeight = $(this).val();
-  //     let newImgWidth = newImgHeight * scale;
-
-  //     imgWidth = newImgWidth;
-  //     imgHeight = newImgHeight;
-
-  //     $("#width").val(newImgWidth);
-
-  //     canvas.width = newImgWidth;
-  //     canvas.height = newImgHeight;
-  //     ctx.drawImage(img, 0, 0, newImgWidth, newImgHeight);
-  //   });
-
-  //   $("#blur").on("click", function () {
-  //     ctx.filter = "blur(10px)";
-  //     ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
-  //   });
-
-  //   $("#convert").on("click", function () {
-  //     initializeProgress();
-
-  //     $("#output-size").text("0B");
-  //     let destType = type.value;
-  //     let ratio = parseInt(quality.value) / 10;
-
-  //     let newFileName = image.name.replace(startType, destType);
-
-  //     if (destType == "jpg") destType = "jpeg";
-
-  //     let value = 0;
-
-  //     let loadingAnimation = setInterval(function () {
-  //       value++;
-  //       $("#progress-bar").val(value);
-
-  //       if (value == 90) {
-  //         clearInterval(loadingAnimation);
-  //       }
-  //     }, 40);
-
-  //     canvas.toBlob(
-  //       function (blob) {
-  //         let outputSize = roundBytes(blob.size);
-  //         // $("#output-name").text(newFileName);
-  //         $("#output-size").text(outputSize);
-
-  //         let newImageBlob = URL.createObjectURL(blob);
-  //         $(".download-image").attr("src", newImageBlob);
-  //         $(".btn-download").removeClass("disable");
-
-  //         $("#download").attr("download", newFileName);
-  //         $("#download").attr("href", newImageBlob);
-
-  //         clearInterval(loadingAnimation);
-
-  //         progressDone();
-  //       },
-  //       "image/" + destType,
-  //       ratio
-  //     );
-  //   });
-  // };
 }
 
-$(".image-tag").on("click", function () {
+$("#navbar").on("click", ".image-tag", function () {
   if (!$(this).hasClass("image-selected")) {
     $(".image-selected").removeClass("image-selected");
     $(this).addClass("image-selected");
@@ -702,15 +983,25 @@ $(".btn-exist").on("click", function (event) {
 // Click to upload file
 uploadBox.addEventListener("click", function () {
   this.classList.add("m-upload-select");
+  $("#describe-upload").addClass("t-blue");
+  $("#icon-upload").addClass("fill-blue");
   $("#upload").click();
 });
 
 $("#upload").on("click", function (event) {
   event.stopPropagation();
+
+  document.body.onfocus = function () {
+    $("#upload-box").removeClass("m-upload-select");
+    $("#describe-upload").removeClass("t-blue");
+    $("#icon-upload").removeClass("fill-blue");
+  };
 });
 
 $("#upload").on("change", function (event) {
   $("#upload-box").removeClass("m-upload-select");
+  $("#describe-upload").removeClass("t-blue");
+  $("#icon-upload").removeClass("fill-blue");
   const fileList = this.files;
   let image = fileList[0];
 
@@ -733,18 +1024,26 @@ function preventDefaults(e) {
 
 uploadBox.addEventListener("dragenter", function () {
   this.classList.add("m-upload-select");
+  $("#describe-upload").addClass("t-blue");
+  $("#icon-upload").addClass("fill-blue");
 });
 
 uploadBox.addEventListener("dragleave", function () {
   this.classList.remove("m-upload-select");
+  $("#describe-upload").removeClass("t-blue");
+  $("#icon-upload").removeClass("fill-blue");
 });
 
 uploadBox.addEventListener("dragover", function () {
   this.classList.add("m-upload-select");
+  $("#describe-upload").addClass("t-blue");
+  $("#icon-upload").addClass("fill-blue");
 });
 
 uploadBox.addEventListener("drop", function (event) {
   this.classList.remove("m-upload-select");
+  $("#describe-upload").removeClass("t-blue");
+  $("#icon-upload").removeClass("fill-blue");
 
   let data = event.dataTransfer;
   let fileList = data.files;
@@ -787,4 +1086,30 @@ slider.addEventListener("mousemove", (e) => {
   const y = e.pageY - slider.offsetTop;
   const walk = y - startY;
   slider.scrollTop = scrollTop - walk;
+});
+
+// Show pop up
+
+$("#navbar").on("mouseenter", ".image-tag", function () {
+  $(this).children(".pop-up").show();
+});
+
+$("#navbar").on("mouseleave", ".image-tag", function () {
+  $(this).children(".pop-up").hide();
+});
+
+$(".tool").on("mouseenter", function () {
+  $(this).children(".pop-up").show();
+});
+
+$(".tool").on("mouseleave", function () {
+  $(this).children(".pop-up").hide();
+});
+
+$(".modal__content").on("mouseenter", ".add-pop-up", function () {
+  $(this).children(".pop-up").show();
+});
+
+$(".modal__content").on("mouseleave", ".add-pop-up", function () {
+  $(this).children(".pop-up").hide();
 });
